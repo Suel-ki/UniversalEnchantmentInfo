@@ -74,17 +74,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          PR_BRANCH="changelog-update-$TAG"
-          git checkout -b "$PR_BRANCH"
+          PR_BRANCH="changelog-update-$BRANCH"
+          git checkout -B "$PR_BRANCH"
           git add "$CHANGELOG_FILE"
           git diff --staged --quiet && exit 0
           git commit -m "chore: update changelog for $TAG"
-          git push origin "$PR_BRANCH"
+          git push -f origin "$PR_BRANCH"
 
           gh pr create \
             --title "docs: update changelog for $TAG" \
             --body "Automated changelog update for \`$TAG\`." \
             --base "$BRANCH" \
-            --head "$PR_BRANCH"
+            --head "$PR_BRANCH" \
+            || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
