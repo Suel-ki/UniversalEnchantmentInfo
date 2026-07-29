@@ -1,0 +1,162 @@
+plugins {
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
+    id "me.modmuss50.mod-publish-plugin" version "2.1.1"
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+def platforms = enabled_platforms.split(",")
+def viewers = ["emi", "jei", "rei"] // ref: https://github.com/yanny7/AdvancedLootInfo/blob/master/build.gradle
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    repositories {
+        maven {
+            name 'ParchmentMC Maven'
+            url 'https://maven.parchmentmc.org'
+        }
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+        }
+    }
+
+    ext {
+        expandProps = [
+            "mod_id"                    : mod_id,
+            "mod_version"               : mod_version,
+            "mod_name"                  : mod_name,
+            "mod_description"           : mod_description,
+            "mod_author"                : mod_author,
+            "license"                   : license,
+            "java_version"              : java_version,
+            "minecraft_version"         : minecraft_version,
+            "forge_version"             : forge_version,
+            "forge_loader_version_range": forge_loader_version_range,
+            "forge_version_range"       : forge_version_range,
+            "fabric_loader_version"     : fabric_loader_version,
+            "emi_version_range"         : emi_version_range,
+            "emi_version_range_fabric"  : emi_version_range_fabric,
+            "jei_version_range"         : jei_version_range,
+            "jei_version_range_fabric"  : jei_version_range_fabric,
+            "rei_version_range"         : rei_version_range,
+            "rei_version_range_fabric"  : rei_version_range_fabric,
+        ]
+    }
+
+    if (platforms.contains(project.name)) {
+        def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
+        def jei_available = jei_enabled == "true" && project.findProperty("${project.name}_jei_enabled") == "true"
+        def rei_available = rei_enabled == "true" && project.findProperty("${project.name}_rei_enabled") == "true"
+
+        ext {
+            commonProjects = [":common"]
+        }
+
+        if (emi_available) project.ext.commonProjects << ":common-emi"
+        if (jei_available) project.ext.commonProjects << ":common-jei"
+        if (rei_available) project.ext.commonProjects << ":common-rei"
+
+        viewers.each { viewer ->
+            if (project.findProperty("${viewer}_enabled") == "true" && project.findProperty("${project.name}_${viewer}_enabled") == "true") {
+                tasks.register("run${project.name.capitalize()}${viewer.capitalize()}Client", GradleBuild) {
+                    group = "launchers"
+                    description = "Launch ${project.name.toUpperCase()} with ${viewer.toUpperCase()} recipe viewer"
+                    setTasks([":${project.name}:runClient".toString()])
+                    startParameter.projectProperties = ["recipe_viewer": viewer]
+                }
+            }
+        }
+
+        dependencies {
+            def recipe_viewer = project.findProperty("recipe_viewer")
+            if (!recipe_viewer) {
+                if (emi_available) recipe_viewer = "emi"
+                else if (jei_available) recipe_viewer = "jei"
+                else if (rei_available) recipe_viewer = "rei"
+            }
+
+            if (emi_available) {
+//                modCompileOnlyApi "dev.emi:emi-${project.name}:${emi_version}"
+//                if (recipe_viewer == "emi") {
+//                    modRuntimeOnly "dev.emi:emi-${project.name}:${emi_version}"
+//                }
+                modCompileOnlyApi "maven.modrinth:emi:${emi_version}+${project.name}"
+                if (recipe_viewer == "emi") {
+                    modRuntimeOnly "maven.modrinth:emi:${emi_version}+${project.name}"
+                }
+            }
+            if (jei_available && recipe_viewer == "jei") {
+                modRuntimeOnly "mezz.jei:jei-${minecraft_version}-${project.name}:${jei_version}"
+            }
+            if (rei_available) {
+                modCompileOnlyApi "me.shedaniel:RoughlyEnoughItems-api-${project.name}:${rei_version}"
+                if (recipe_viewer == "rei") {
+                    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-${project.name}:${rei_version}"
+                    if (project.name == "forge") {
+                        modRuntimeOnly "me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}"
+                        modRuntimeOnly "dev.architectury:architectury-forge:${architectury_version}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
+
+    base {
+        archivesName = rootProject.archives_base_name + "-" + project.name
+    }
+
+    version = rootProject.mod_version
+    group = rootProject.maven_group
+
+    repositories {
+        maven {
+            name = "Jared's maven"
+            url = "https://maven.blamejared.com/"
+        }
+        maven {
+            name = "Gnomecraft Maven"
+            url = "https://maven.gnomecraft.net/releases/"
+        }
+        maven {
+            name = "Shedaniel Maven"
+            url = "https://maven.shedaniel.me/"
+        }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = Integer.valueOf(rootProject.java_version)
+    }
+
+    java {
+        withSourcesJar()
+    }
+}
+
+tasks.publish {
+    dependsOn("fabric:publishMods")
+    dependsOn("forge:publishMods")
+}

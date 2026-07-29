@@ -1,0 +1,72 @@
+name: "🐛 Bug Report"
+description: "Report a bug to help improve the mod!"
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: conflict-check
+    attributes:
+      label: "Conflict Check"
+      description: "Please confirm that you've done your homework! 📚"
+      options:
+        - label: "I have confirmed that this issue occurs with **ONLY** this mod (and its dependencies) installed."
+          required: true
+        - label: "I am using the **LATEST** version of the mod for my Minecraft version."
+          required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: "Mod Loader"
+      description: "Which loader are you using?"
+      options:
+        - NeoForge
+        - Fabric
+        - Forge (Legacy)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: "Versions"
+      placeholder: "e.g., Minecraft 1.21.1, Mod v1.0.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Bug Description"
+      description: "A clear and concise description of what the bug is."
+      placeholder: "Tell me what went wrong..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce"
+      description: "How do we make this happen again?"
+      placeholder: |
+        1. Open the game
+        2. Equip the Tarot Deck
+        3. Press [Key]
+        4. See error...
+    validations:
+      required: true
+
+  - type: input
+    id: logs
+    attributes:
+      label: "Logs / Crash Report"
+      description: "Please upload your logs to https://mclo.gs/ and paste the link here."
+      placeholder: "https://mclo.gs/xxxxx"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional Context"
+      description: "Anything else? (Screenshots, other mods installed, etc.)"

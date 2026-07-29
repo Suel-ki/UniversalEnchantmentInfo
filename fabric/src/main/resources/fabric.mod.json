@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Suel-ki/UniversalEnchantmentInfo",
+    "sources": "https://github.com/Suel-ki/UniversalEnchantmentInfo",
+    "issues": "https://github.com/Suel-ki/UniversalEnchantmentInfo/issues"
+  },
+  "license": "${license}",
+  "icon": "logo.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "io.github.suel_ki.uei.fabric.UeiFabric"
+    ],
+    "modmenu": [
+      "io.github.suel_ki.uei.fabric.modmenu.ModMenuIntegration"
+    ],
+    "emi": [
+      "io.github.suel_ki.uei.compat.emi.EMIPlugin"
+    ],
+    "jei_mod_plugin": [
+      "io.github.suel_ki.uei.compat.jei.JEIPlugin"
+    ],
+    "rei_client": [
+      "io.github.suel_ki.uei.compat.rei.REIPlugin"
+    ]
+  },
+  "mixins": [
+    "uei.emi.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  },
+  "suggests": {
+    "emi": "${emi_version_range_fabric}",
+    "jei": "${jei_version_range_fabric}",
+    "rei": "${rei_version_range_fabric}"
+  }
+}

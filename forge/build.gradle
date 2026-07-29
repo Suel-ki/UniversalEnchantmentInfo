@@ -1,0 +1,127 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "me.modmuss50.mod-publish-plugin"
+}
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
+def jei_available = jei_enabled == "true" && project.findProperty("${project.name}_jei_enabled") == "true"
+def rei_available = rei_enabled == "true" && project.findProperty("${project.name}_rei_enabled") == "true"
+
+loom {
+    // accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    forge {
+        // convertAccessWideners = true
+        // extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        if (emi_available) {
+            mixinConfig "uei.emi.mixins.json"
+        }
+    }
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    if (emi_available) {
+        common(project(path: ":common-emi", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-emi", configuration: "transformProductionForge")) { transitive = false }
+    }
+    if (jei_available) {
+        common(project(path: ":common-jei", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-jei", configuration: "transformProductionForge")) { transitive = false }
+    }
+    if (rei_available) {
+        common(project(path: ":common-rei", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-rei", configuration: "transformProductionForge")) { transitive = false }
+    }
+}
+
+processResources {
+    filesMatching(["META-INF/mods.toml", "pack.mcmeta"]) {
+        expand project.ext.expandProps
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-" + project.name
+            from components.java
+        }
+    }
+
+    repositories {
+    }
+}
+
+publishMods {
+    file = tasks.remapJar.archiveFile
+    displayName = "[Forge ${project.minecraft_version}] v${project.version}"
+    changelog = rootProject.file("docs/CHANGELOGS.md").exists()
+        ? rootProject.file("docs/CHANGELOGS.md").text
+        : ""
+    type = STABLE
+    modLoaders.add("forge")
+
+    curseforge {
+        projectId = "1630244"
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+        client = true
+        minecraftVersions.add(project.minecraft_version)
+        optional("jei")
+        optional("emi")
+        optional("roughly-enough-items")
+    }
+
+    modrinth {
+        projectId = "c39iXKSf"
+        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+        environment = CLIENT_ONLY
+        minecraftVersions.add(project.minecraft_version)
+        optional("jei")
+        optional("emi")
+        optional("rei")
+    }
+}

@@ -1,0 +1,120 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "me.modmuss50.mod-publish-plugin"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    // accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
+def jei_available = jei_enabled == "true" && project.findProperty("${project.name}_jei_enabled") == "true"
+def rei_available = rei_enabled == "true" && project.findProperty("${project.name}_rei_enabled") == "true"
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modImplementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
+    if (emi_available) {
+        common(project(path: ":common-emi", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-emi", configuration: "transformProductionFabric")) { transitive = false }
+    }
+    if (jei_available) {
+        common(project(path: ":common-jei", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-jei", configuration: "transformProductionFabric")) { transitive = false }
+    }
+    if (rei_available) {
+        common(project(path: ":common-rei", configuration: "namedElements")) { transitive false }
+        shadowCommon(project(path: ":common-rei", configuration: "transformProductionFabric")) { transitive = false }
+    }
+}
+
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand project.ext.expandProps
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-" + project.name
+            from components.java
+        }
+    }
+
+    repositories {
+    }
+}
+
+publishMods {
+    file = tasks.remapJar.archiveFile
+    displayName = "[Fabric ${project.minecraft_version}] v${project.version}"
+    changelog = rootProject.file("docs/CHANGELOGS.md").exists()
+        ? rootProject.file("docs/CHANGELOGS.md").text
+        : ""
+    type = STABLE
+    modLoaders.add("fabric")
+
+    curseforge {
+        projectId = "1630244"
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+        client = true
+        minecraftVersions.add(project.minecraft_version)
+        optional("jei")
+        optional("emi")
+        optional("roughly-enough-items")
+    }
+
+    modrinth {
+        projectId = "c39iXKSf"
+        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+        environment = CLIENT_ONLY
+        minecraftVersions.add(project.minecraft_version)
+        optional("jei")
+        optional("emi")
+        optional("rei")
+    }
+}

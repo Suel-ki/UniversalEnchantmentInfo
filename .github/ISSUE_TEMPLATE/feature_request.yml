@@ -1,0 +1,68 @@
+name: "💡 Feature Request"
+description: "Suggest a new idea or improvement for the mod!"
+title: "[FEAT]: "
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    id: scope-check
+    attributes:
+      label: "Scope & Style Check"
+      description: "Does this fit the mod's vision?"
+      options:
+        - label: "I have searched the existing issues and this is not a duplicate."
+          required: true
+        - label: "I believe this feature fits the **core vision of the TarotCards mod**."
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: "Feature Type"
+      description: "What kind of suggestion is this?"
+      options:
+        - New Tarot Card / Effect
+        - Gameplay Mechanic
+        - Compatibility (with other mods)
+        - Performance / Optimization
+        - Documentation / Localization
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Feature Summary"
+      description: "What is your idea?"
+      placeholder: "e.g., Add a 'Reversed' variant for each Tarot card with negative effects."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: "The 'Why'"
+      description: "How does this improve the gameplay or experience?"
+      placeholder: "This would add more risk/reward depth to the card-drawing mechanic..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: "Implementation Details (Optional)"
+      description: "How do you imagine this working in-game?"
+      placeholder: "The cards could have a 10% chance to be flipped when drawn, changing the NBT data..."
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternative Solutions"
+      description: "Is there any other way to achieve this? Or is there another mod that already does this?"
+
+  - type: checkboxes
+    id: credit
+    attributes:
+      label: "Final Notes"
+      options:
+        - label: "I am willing to help test this feature if it gets implemented."

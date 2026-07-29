@@ -1,0 +1,51 @@
+[changelog]
+header = ""
+footer = ""
+trim = true
+
+body = """
+{% if version %}\
+Version [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+Version [Unreleased]
+{% endif %}\
+
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | trim | upper_first }}\
+{% if commit.links %} \
+({% for link in commit.links %}[#{{ link.text | replace(from="#", to="") }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %})\
+{% endif %}
+{% endfor %}
+{% endfor %}
+"""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+
+link_parsers = [
+    { pattern = "#(\\d+)", href = "https://github.com/Suel-ki/UniversalEnchantmentInfo/issues/$1" }
+]
+
+commit_parsers = [
+    { message = "^feat", group = "<!-- 1 -->Features" },
+    { message = "^fix", group = "<!-- 2 -->Bug Fixes" },
+    { message = "^perf", group = "<!-- 3 -->Performance" },
+    { message = "^refactor", group = "<!-- 4 -->♻Refactoring" },
+    { message = "^docs", group = "<!-- 5 -->Documentation" },
+
+    { message = "^chore", skip = true },
+    { message = "^style", skip = true },
+    { message = "^test", skip = true },
+    { message = "^build", skip = true },
+    { message = "^ci", skip = true },
+]
+
+filter_commits = true
+tag_pattern = "v[0-9]*\\.[0-9]*\\.[0-9]*-[0-9]*\\.[0-9]*\\.[0-9]*"
+
+date_order = false
+sort_commits = "newest"

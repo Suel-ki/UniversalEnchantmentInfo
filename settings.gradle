@@ -1,0 +1,25 @@
+pluginManagement {
+    repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        gradlePluginPortal()
+    }
+}
+
+include("common")
+
+if (settings.emi_enabled == "true") {
+    include("common-emi")
+}
+if (settings.jei_enabled == "true") {
+    include("common-jei")
+}
+if (settings.rei_enabled == "true") {
+    include("common-rei")
+}
+
+include("fabric")
+include("forge")
+
+rootProject.name = "UniversalEnchantmentInfo"
