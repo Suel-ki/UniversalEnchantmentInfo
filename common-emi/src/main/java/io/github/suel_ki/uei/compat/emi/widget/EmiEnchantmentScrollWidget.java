@@ -10,7 +10,7 @@ import io.github.suel_ki.uei.compat.emi.compat.IMouseEvents;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
@@ -61,7 +61,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
         scrollContext.tick();
 
         float scrollAmount = getScrollAmount();
@@ -73,8 +73,8 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
 
         try (var ignored = ScissorHelper.scissor(g, bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height())) {
 
-            g.pose().pushPose();
-            g.pose().translate(0, -Math.round(scrollAmount), 0);
+            g.pose().pushMatrix();
+            g.pose().translate(0, -Math.round(scrollAmount));
 
             EnchantmentScrollContent.drawDescription(g, font, descLines, left, top, pad);
 
@@ -95,7 +95,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
                         left + pad, chy, contentRight, chy + font.lineHeight, -1, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
             }
 
-            g.pose().popPose();
+            g.pose().popMatrix();
         }
 
         scrollContext.drawScrollbar(g);

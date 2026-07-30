@@ -11,7 +11,7 @@ import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.compat.emi.widget.EmiEnchantmentScrollWidget;
 import io.github.suel_ki.uei.compat.emi.widget.ScrollSlotWidget;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,12 +20,12 @@ import java.util.List;
 
 public class EmiEnchantmentRecipe implements EmiRecipe {
     private final EnchantmentRecipeData recipe;
-    private final ResourceLocation id;
+    private final Identifier id;
 
     private final List<EmiIngredient> inputs;
     private final List<EmiStack> outputs;
 
-    public EmiEnchantmentRecipe(ResourceLocation id, EnchantmentRecipeData recipe) {
+    public EmiEnchantmentRecipe(Identifier id, EnchantmentRecipeData recipe) {
         this.recipe = recipe;
         this.id = id;
         this.inputs = recipe.exclusiveStacks().stream().<EmiIngredient>map(EmiStack::of).toList();
@@ -38,7 +38,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
     }
 
     @Override
-    public @Nullable ResourceLocation getId() {
+    public @Nullable Identifier getId() {
         return id;
     }
 

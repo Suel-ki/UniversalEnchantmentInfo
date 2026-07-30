@@ -4,7 +4,7 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.SlotWidget;
 import io.github.suel_ki.uei.client.render.ScissorHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.function.Supplier;
 
@@ -36,7 +36,7 @@ public class ScrollSlotWidget extends SlotWidget {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
         Bounds currentBounds = getBounds();
 
         if (currentBounds == outOfBounds) {
@@ -46,7 +46,7 @@ public class ScrollSlotWidget extends SlotWidget {
         try (var ignored = ScissorHelper.scissor(g,
                 scrollArea.x(), scrollArea.y(),
                 scrollArea.x() + scrollArea.width(), scrollArea.y() + scrollArea.height())) {
-            super.render(g, mouseX, mouseY, delta);
+            super.extractRenderState(g, mouseX, mouseY, delta);
         }
     }
 }

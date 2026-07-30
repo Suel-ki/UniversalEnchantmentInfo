@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'com.gradleup.shadow'
     id "me.modmuss50.mod-publish-plugin"
 }
 
@@ -10,6 +10,10 @@ architectury {
 
 loom {
     // accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+base {
+    archivesName = "UniversalEnchantmentInfo" + "-" + minecraft_version + "-fabric"
 }
 
 def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
@@ -25,23 +29,23 @@ configurations {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-    modImplementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    implementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     if (emi_available) {
-        common(project(path: ":common-emi", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-emi")) { transitive false }
         shadowCommon(project(path: ":common-emi", configuration: "transformProductionFabric")) { transitive = false }
     }
     if (jei_available) {
-        common(project(path: ":common-jei", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-jei")) { transitive false }
         shadowCommon(project(path: ":common-jei", configuration: "transformProductionFabric")) { transitive = false }
     }
     if (rei_available) {
-        common(project(path: ":common-rei", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-rei")) { transitive false }
         shadowCommon(project(path: ":common-rei", configuration: "transformProductionFabric")) { transitive = false }
     }
 }
@@ -56,13 +60,11 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
+    archiveClassifier = null
 }
 
-remapJar {
-    injectAccessWidener = true
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
+jar {
+    archiveClassifier = "raw"
 }
 
 sourcesJar {
@@ -90,7 +92,7 @@ publishing {
 }
 
 publishMods {
-    file = tasks.remapJar.archiveFile
+    file = tasks.shadowJar.archiveFile
     displayName = "[Fabric ${project.minecraft_version}] v${project.version}"
     changelog = rootProject.file("docs/CHANGELOGS.md").exists()
         ? rootProject.file("docs/CHANGELOGS.md").text

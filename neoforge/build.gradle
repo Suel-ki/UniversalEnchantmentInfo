@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'com.gradleup.shadow'
     id "me.modmuss50.mod-publish-plugin"
 }
 
@@ -14,6 +14,10 @@ def rei_available = rei_enabled == "true" && project.findProperty("${project.nam
 
 loom {
     // accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+base {
+    archivesName = "UniversalEnchantmentInfo" + "-" + minecraft_version + "-neoforge"
 }
 
 configurations {
@@ -34,19 +38,19 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     if (emi_available) {
-        common(project(path: ":common-emi", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-emi")) { transitive false }
         shadowCommon(project(path: ":common-emi", configuration: "transformProductionNeoForge")) { transitive = false }
     }
     if (jei_available) {
-        common(project(path: ":common-jei", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-jei")) { transitive false }
         shadowCommon(project(path: ":common-jei", configuration: "transformProductionNeoForge")) { transitive = false }
     }
     if (rei_available) {
-        common(project(path: ":common-rei", configuration: "namedElements")) { transitive false }
+        common(project(path: ":common-rei")) { transitive false }
         shadowCommon(project(path: ":common-rei", configuration: "transformProductionNeoForge")) { transitive = false }
     }
 }
@@ -62,12 +66,11 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
+    archiveClassifier = null
 }
 
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
+jar {
+    archiveClassifier = "raw"
 }
 
 sourcesJar {
@@ -95,7 +98,7 @@ publishing {
 }
 
 publishMods {
-    file = tasks.remapJar.archiveFile
+    file = tasks.shadowJar.archiveFile
     displayName = "[NeoForge ${project.minecraft_version}] v${project.version}"
     changelog = rootProject.file("docs/CHANGELOGS.md").exists()
         ? rootProject.file("docs/CHANGELOGS.md").text

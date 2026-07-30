@@ -1,7 +1,8 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
+    id "architectury-plugin" version "3.5-SNAPSHOT"
+    id "dev.architectury.loom-no-remap" version "1.17-SNAPSHOT" apply false
     id "me.modmuss50.mod-publish-plugin" version "2.1.1"
+    id "com.gradleup.shadow" version "9.4.1" apply false
 }
 
 architectury {
@@ -12,25 +13,10 @@ def platforms = enabled_platforms.split(",")
 def viewers = ["emi", "jei", "rei"] // ref: https://github.com/yanny7/AdvancedLootInfo/blob/master/build.gradle
 
 subprojects {
-    apply plugin: "dev.architectury.loom"
-
-    loom {
-        silentMojangMappingsLicense()
-    }
-
-    repositories {
-        maven {
-            name 'ParchmentMC Maven'
-            url 'https://maven.parchmentmc.org'
-        }
-    }
+    apply plugin: "dev.architectury.loom-no-remap"
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings loom.layered() {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-        }
     }
 
     ext {
@@ -93,21 +79,26 @@ subprojects {
 //                if (recipe_viewer == "emi") {
 //                    modRuntimeOnly "dev.emi:emi-${project.name}:${emi_version}"
 //                }
-                modCompileOnlyApi "maven.modrinth:emi:${emi_version}+${project.name}"
+                compileOnlyApi "curse.maven:emi-1544558:${emi_neoforge}"
                 if (recipe_viewer == "emi") {
-                    modRuntimeOnly "maven.modrinth:emi:${emi_version}+${project.name}"
+                     if (project.name == "neoforge") {
+                         runtimeOnly "curse.maven:emi-1544558:${emi_neoforge}"
+                     }
+                     if (project.name == "fabric") {
+                         runtimeOnly "curse.maven:emi-1544558:${emi_fabric}"
+                     }
                 }
             }
             if (jei_available && recipe_viewer == "jei") {
-                modRuntimeOnly "mezz.jei:jei-${minecraft_version}-${project.name}:${jei_version}"
+                runtimeOnly "mezz.jei:jei-${minecraft_version}-${project.name}:${jei_version}"
             }
             if (rei_available) {
-                modCompileOnlyApi "me.shedaniel:RoughlyEnoughItems-api-${project.name}:${rei_version}"
+                compileOnlyApi "me.shedaniel:RoughlyEnoughItems-api-${project.name}:${rei_version}"
                 if (recipe_viewer == "rei") {
-                    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-${project.name}:${rei_version}"
-                    if (project.name == "forge") {
-                        modRuntimeOnly "me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}"
-                        modRuntimeOnly "dev.architectury:architectury-forge:${architectury_version}"
+                    runtimeOnly "me.shedaniel:RoughlyEnoughItems-${project.name}:${rei_version}"
+                    if (project.name == "neoforge") {
+                        runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+                        runtimeOnly "dev.architectury:architectury-neoforge:${architectury_version}"
                     }
                 }
             }
@@ -143,6 +134,10 @@ allprojects {
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
+        }
+        maven {
+            name = "CurseMaven"
+            url "https://www.cursemaven.com"
         }
     }
 

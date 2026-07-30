@@ -2,7 +2,7 @@ package io.github.suel_ki.uei.client.scroll;
 
 import io.github.suel_ki.uei.client.render.ScrollbarRenderer;
 import io.github.suel_ki.uei.config.Config;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.util.Mth;
 
@@ -133,7 +133,7 @@ public class ScrollContext {
     // endregion
 
     // region Rendering
-    public void drawScrollbar(GuiGraphics g) {
+    public void drawScrollbar(GuiGraphicsExtractor g) {
         int max = maxScrollSupplier.getAsInt();
         if (max <= 0) {
             return;

@@ -7,7 +7,7 @@ import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -66,12 +66,12 @@ public final class EnchantmentScrollContent {
         return (float) (f * overflow);
     }
 
-    public static void renderScrollingString(GuiGraphics g, Font font, Component text,
+    public static void renderScrollingString(GuiGraphicsExtractor g, Font font, Component text,
                                              int minX, int minY, int maxX, int maxY, int color) {
         renderScrollingString(g, font, text, minX, minY, maxX, maxY, color, UNIVERSAL_SCISSOR);
     }
 
-    public static void renderScrollingString(GuiGraphics g, Font font, Component text,
+    public static void renderScrollingString(GuiGraphicsExtractor g, Font font, Component text,
                                              int minX, int minY, int maxX, int maxY, int color,
                                              ScissorRenderer scissorRenderer) {
         int textWidth = font.width(text);
@@ -80,13 +80,13 @@ public final class EnchantmentScrollContent {
             float offset = computeScrollOffset(textWidth, availableWidth);
             scissorRenderer.render(g, font, text, minX, minY, maxX, maxY, color, offset);
         } else {
-            g.drawString(font, text, minX, minY, color, false);
+            g.text(font, text, minX, minY, color, false);
         }
     }
 
     @FunctionalInterface
     public interface ScissorRenderer {
-        void render(GuiGraphics g, Font font, Component text, int minX, int minY,
+        void render(GuiGraphicsExtractor g, Font font, Component text, int minX, int minY,
                     int maxX, int maxY, int color, float offset);
     }
 
@@ -94,27 +94,27 @@ public final class EnchantmentScrollContent {
         try (var ignored = ScissorHelper.scissor(g, minX, minY, maxX, maxY)) {
             g.pose().pushMatrix();
             g.pose().translate(minX - offset, (float) minY);
-            g.drawString(font, text, 0, 0, color, false);
+            g.text(font, text, 0, 0, color, false);
             g.pose().popMatrix();
         }
     };
 
-    public static void drawInfoLine(GuiGraphics g, Font font, int x, int y, int maxX,
+    public static void drawInfoLine(GuiGraphicsExtractor g, Font font, int x, int y, int maxX,
                                     Component label, Component value, int valueColor,
                                     ScissorRenderer scissorRenderer) {
-        g.drawString(font, label, x, y, -1, false);
+        g.text(font, label, x, y, -1, false);
         int startX = x + font.width(label) + 4;
         int availableWidth = maxX - startX;
         renderScrollingString(g, font, value, startX, y,
                 startX + availableWidth, y + font.lineHeight, valueColor, scissorRenderer);
     }
 
-    public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
+    public static void drawExclusiveHeader(GuiGraphicsExtractor g, Font font, int x, int y, int maxX,
                                            Component header, int exclusiveCount) {
         drawExclusiveHeader(g, font, x, y, maxX, header, exclusiveCount, UNIVERSAL_SCISSOR);
     }
 
-    public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
+    public static void drawExclusiveHeader(GuiGraphicsExtractor g, Font font, int x, int y, int maxX,
                                            Component header, int exclusiveCount,
                                            ScissorRenderer scissorRenderer) {
         Component count = Component.literal(String.valueOf(exclusiveCount))
@@ -123,28 +123,28 @@ public final class EnchantmentScrollContent {
         int headerMaxX = maxX - countWidth - 4;
         renderScrollingString(g, font, header, x, y, headerMaxX,
                 y + font.lineHeight, -1, scissorRenderer);
-        g.drawString(font, count, maxX - countWidth, y, -1, false);
+        g.text(font, count, maxX - countWidth, y, -1, false);
     }
 
-    public static void drawDescription(GuiGraphics g, Font font, List<FormattedCharSequence> descLines,
+    public static void drawDescription(GuiGraphicsExtractor g, Font font, List<FormattedCharSequence> descLines,
                                        int x, int y, int pad) {
-        g.drawString(font, DESCRIPTION,
+        g.text(font, DESCRIPTION,
                 x + pad, y + EnchantmentUIRenderer.DESC_HEADER_Y, -1, false);
 
         int lh = font.lineHeight + 1;
         int descTextY = y + EnchantmentUIRenderer.DESC_TEXT_Y;
         for (int i = 0; i < descLines.size(); i++) {
-            g.drawString(font, descLines.get(i), x + pad, descTextY + i * lh, -1, false);
+            g.text(font, descLines.get(i), x + pad, descTextY + i * lh, -1, false);
         }
     }
 
-    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
+    public static int drawInfoLines(GuiGraphicsExtractor g, Font font, EnchantmentRecipeData recipe,
                                     List<FormattedCharSequence> descLines,
                                     int x, int y, int pad, int maxX) {
         return drawInfoLines(g, font, recipe, descLines, x, y, pad, maxX, UNIVERSAL_SCISSOR);
     }
 
-    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
+    public static int drawInfoLines(GuiGraphicsExtractor g, Font font, EnchantmentRecipeData recipe,
                                     List<FormattedCharSequence> descLines,
                                     int x, int y, int pad, int maxX,
                                     ScissorRenderer scissorRenderer) {

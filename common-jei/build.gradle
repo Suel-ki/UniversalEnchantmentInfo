@@ -3,7 +3,7 @@ architectury {
 }
 
 dependencies {
-    compileOnly project(path: ":common", configuration: "namedElements")
-    modCompileOnlyApi "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
-    modCompileOnly "mezz.jei:jei-${minecraft_version}-common:${jei_version}"
+    compileOnly project(path: ":common")
+    compileOnlyApi "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-common:${jei_version}"
 }

@@ -7,13 +7,13 @@ import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiStack;
 import io.github.suel_ki.uei.Uei;
 import io.github.suel_ki.uei.ench.EnchantmentDataFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 
 @EmiEntrypoint
 public class EMIPlugin implements EmiPlugin {
     public static final EmiRecipeCategory ENCHANTMENT_CATEGORY = new EnchantmentRecipeCategory(
-            ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "ench_info"), EmiStack.of(Items.ENCHANTED_BOOK));
+            Identifier.fromNamespaceAndPath(Uei.MOD_ID, "ench_info"), EmiStack.of(Items.ENCHANTED_BOOK));
 
     @Override
     public void register(EmiRegistry registry) {
@@ -23,9 +23,9 @@ public class EMIPlugin implements EmiPlugin {
 
         for (var recipe : EnchantmentDataFactory.getOrComputeRecipes()) {
             recipe.enchantment().unwrapKey().ifPresent(key -> {
-                ResourceLocation id = key.location();
+                Identifier id = key.identifier();
 
-                ResourceLocation recipeId = ResourceLocation.fromNamespaceAndPath(
+                Identifier recipeId = Identifier.fromNamespaceAndPath(
                         Uei.MOD_ID,
                         String.format("/%s/%s", id.getNamespace(), id.getPath())
                 );

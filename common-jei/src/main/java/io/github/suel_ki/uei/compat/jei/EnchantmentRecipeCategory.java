@@ -18,7 +18,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -86,13 +86,13 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
     }
 
     @Override
-    public void draw(EnchantmentRecipeData recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+    public void draw(EnchantmentRecipeData recipe, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         Font font = Minecraft.getInstance().font;
         g.fill(0, EnchantmentUIRenderer.UPPER_HEIGHT, EnchantmentUIRenderer.PANEL_WIDTH,
                 EnchantmentUIRenderer.UPPER_HEIGHT + 1, 0xFF555555);
-        g.drawString(font, recipe.localizedName(),
+        g.text(font, recipe.localizedName(),
                 EnchantmentUIRenderer.NAME_X, EnchantmentUIRenderer.NAME_Y, -1);
-        g.drawString(font, recipe.modName(),
+        g.text(font, recipe.modName(),
                 EnchantmentUIRenderer.MOD_NAME_X, EnchantmentUIRenderer.MOD_NAME_Y, -1, false);
     }
 

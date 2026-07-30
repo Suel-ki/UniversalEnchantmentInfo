@@ -7,7 +7,7 @@ import io.github.suel_ki.uei.ench.EnchantmentDataFactory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -80,13 +80,13 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
+        graphics.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
 
         if (this.list.children().stream().anyMatch(e -> e.spec != null && e.spec.impactsCache() && e.valid && e.hasChanged())) {
-            graphics.drawCenteredString(this.font, Component.translatable("uei.config.reload_notice"), this.width / 2, this.height - 34, 0xFFAAAAAA);
+            graphics.centeredText(this.font, Component.translatable("uei.config.reload_notice"), this.width / 2, this.height - 34, 0xFFAAAAAA);
         }
     }
 
@@ -206,7 +206,7 @@ public class ConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
                 int x = this.getX();
                 int y = this.getY();
                 int width = this.getWidth();
@@ -214,13 +214,13 @@ public class ConfigScreen extends Screen {
                 if (isMouseOver) {
                     graphics.fill(x, y - 2, x + width, y + height - 2, 0x1AFFFFFF);
                 }
-                graphics.drawString(this.font, this.label, x + width / 2 - 10 - this.font.width(this.label), y + 6, 0xFFFFFFFF);
+                graphics.text(this.font, this.label, x + width / 2 - 10 - this.font.width(this.label), y + 6, 0xFFFFFFFF);
                 this.valueWidget.setY(y);
                 this.valueWidget.setX(x + width / 2 + 10);
                 this.resetButton.setY(y);
                 this.resetButton.setX(x + width / 2 + (isColor ? 104 : 92));
-                this.valueWidget.render(graphics, mouseX, mouseY, partialTick);
-                this.resetButton.render(graphics, mouseX, mouseY, partialTick);
+                this.valueWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                this.resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 if (isColor && valid) {
                     int cx = x + width / 2 + 93;
                     int cy = y + 5;

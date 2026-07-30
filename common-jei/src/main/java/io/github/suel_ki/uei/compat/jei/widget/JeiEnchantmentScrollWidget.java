@@ -15,7 +15,7 @@ import mezz.jei.common.Internal;
 import mezz.jei.common.util.ImmutableRect2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.FormattedCharSequence;
@@ -70,7 +70,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
     }
 
     @Override
-    public void drawWidget(GuiGraphics g, double mouseX, double mouseY) {
+    public void drawWidget(GuiGraphicsExtractor g, double mouseX, double mouseY) {
         scrollContext.tick();
 
         Minecraft mc = Minecraft.getInstance();

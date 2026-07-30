@@ -9,13 +9,8 @@ loom {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    compileOnly project(path: ":common", configuration: "namedElements")
-//    modCompileOnlyApi "dev.emi:emi-xplat-mojmap:${emi_version}:api"
-//    modCompileOnlyApi "dev.emi:emi-xplat-mojmap:${emi_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    compileOnly project(path: ":common")
 
-    // https://github.com/TerraformersMC/ModMenu/issues/1069
-    modCompileOnlyApi files("libs/emi-1.1.24+1.21.1+neoforge.jar")
-
-    modCompileOnlyApi "mezz.jei:jei-${minecraft_version}-common:${jei_version}"
+    compileOnlyApi "curse.maven:emi-1544558:${emi_neoforge}"
 }
