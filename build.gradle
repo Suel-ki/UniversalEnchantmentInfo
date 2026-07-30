@@ -158,5 +158,5 @@ allprojects {
 
 tasks.publish {
     dependsOn("fabric:publishMods")
-    dependsOn("forge:publishMods")
+    dependsOn("neoforge:publishMods")
 }
