@@ -5,27 +5,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 public class ScrollbarRenderer {
-    private static final ResourceLocation SCROLLBAR_TEXTURE = new ResourceLocation(Uei.MOD_ID, "textures/gui/scrollbar.png");
+    private static final ResourceLocation SCROLLBAR_TRACK = ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "scrollbar_track");
+    private static final ResourceLocation SCROLLBAR_THUMB = ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "scrollbar_thumb");
 
     public static void renderScrollbar(GuiGraphics g, int trackX, int trackY, int trackW, int trackH, int thumbX, int thumbY, int thumbW, int thumbH) {
-        g.blitNineSliced(
-                SCROLLBAR_TEXTURE,
-                trackX, trackY,
-                trackW, trackH,
-                6, 6,
-                6, 6,
-                14, 50,
-                0, 0
-        );
+        g.blitSprite(SCROLLBAR_TRACK, trackX, trackY, trackW, trackH);
 
-        g.blitNineSliced(
-                SCROLLBAR_TEXTURE,
-                thumbX, thumbY,
-                thumbW, thumbH,
-                2, 2,
-                2, 1,
-                12, 15,
-                14, 0
-        );
+        g.blitSprite(SCROLLBAR_THUMB, thumbX, thumbY, thumbW, thumbH);
     }
 }

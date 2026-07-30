@@ -9,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -60,7 +61,7 @@ public final class EnchantmentScrollContent {
         double time = (double) Util.getMillis() / 1000.0D;
         double cycle = Math.max((double) overflow * 0.15D / Config.get().textScrollSpeedMultiplier, 4.0D);
         double rawSin = Math.sin(time * Math.PI * 2 / cycle);
-        double clampedSin = Math.max(-1.0, Math.min(1.0, rawSin * 1.6));
+        double clampedSin = Math.clamp(rawSin * 1.6, -1.0, 1.0);
         double f = (clampedSin + 1.0) / 2.0;
         return (float) (f * overflow);
     }
@@ -140,7 +141,7 @@ public final class EnchantmentScrollContent {
 
         if (cfg.showRarity) {
             drawInfoLine(g, font, x + pad, lineY, maxX,
-                    RARITY, recipe.rarityName(), recipe.rarityColor(), scissorRenderer);
+                    RARITY, recipe.rarityName(), -1, scissorRenderer);
             lineY += ilh;
         }
         if (cfg.showMaxLevel) {
@@ -176,8 +177,7 @@ public final class EnchantmentScrollContent {
         }
 
         int ahy = lineY + 2;
-        drawInfoLine(g, font, x + pad, ahy, maxX,
-                APPLIES_TO, recipe.appliesToText(), -1, scissorRenderer);
+        renderScrollingString(g, font, APPLIES_TO, x + pad, ahy, maxX, ahy + font.lineHeight, -1, scissorRenderer);
 
         return ahy + ilh;
     }
@@ -237,7 +237,7 @@ public final class EnchantmentScrollContent {
 
     // Batch applicable items by max slot count, evenly distributed
     public static List<List<ItemStack>> batchApplicableItems(EnchantmentRecipeData recipe) {
-        List<Item> items = recipe.applicableItems();
+        List<Holder<Item>> items = recipe.applicableItems();
         int itemsSize = items.size();
         int maxSlots = Math.max(1, Config.get().maxApplicableSlots);
 
@@ -258,7 +258,7 @@ public final class EnchantmentScrollContent {
             List<ItemStack> currentBatch = new ArrayList<>(currentBatchSize);
 
             for (int j = 0; j < currentBatchSize; j++) {
-                currentBatch.add(items.get(idx + j).getDefaultInstance());
+                currentBatch.add(new ItemStack(items.get(idx + j)));
             }
 
             batches.add(currentBatch);

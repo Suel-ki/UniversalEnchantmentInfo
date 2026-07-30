@@ -34,9 +34,10 @@ public class ConfigScreen extends Screen {
 
     @Override
     protected void init() {
-        int top = 33;
-        int bottom = this.height - 35;
-        this.list = new ConfigList(this.minecraft, this.width, this.height, top, bottom, 30);
+        int listY = 33;
+        int listBottom = this.height - 35;
+        int listHeight = listBottom - listY;
+        this.list = new ConfigList(this.minecraft, this.width, listHeight, listY, 30);
         this.addRenderableWidget(this.list);
 
         if (this.entries.isEmpty()) {
@@ -80,8 +81,6 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
         super.render(graphics, mouseX, mouseY, partialTick);
 
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
@@ -97,8 +96,8 @@ public class ConfigScreen extends Screen {
     }
 
     private static class ConfigList extends ContainerObjectSelectionList<ConfigList.Entry> {
-        public ConfigList(Minecraft mc, int width, int height, int top, int bottom, int itemHeight) {
-            super(mc, width, height, top, bottom, itemHeight);
+        public ConfigList(Minecraft mc, int width, int height, int y, int itemHeight) {
+            super(mc, width, height, y, itemHeight);
         }
 
         public int addEntry(Entry entry) {

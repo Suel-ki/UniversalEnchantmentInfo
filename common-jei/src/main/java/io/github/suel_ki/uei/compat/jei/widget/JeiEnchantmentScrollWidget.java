@@ -7,7 +7,6 @@ import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.client.scroll.ScrollContext;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
-import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.inputs.IJeiInputHandler;
 import mezz.jei.api.gui.inputs.IJeiUserInput;
@@ -83,6 +82,9 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         int pad = EnchantmentUIRenderer.PADDING;
         int contentWidth = scrollContext.contentWidth();
 
+        float totalScroll = scrollContext.scrollAmount();
+        double adjY = mouseY + totalScroll;
+
         PoseStack poseStack = g.pose();
         ScreenRectangle scissorBounds = MathUtil.transform(contentsArea, poseStack.last().pose());
         try (var ignored = ScissorHelper.scissorScreen(g, scissorBounds.left(), scissorBounds.top(), scissorBounds.right(), scissorBounds.bottom())) {
@@ -100,8 +102,9 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
             for (int i = 0; i < applicableSlots.size(); i++) {
                 int x = EnchantmentScrollContent.gridX(i, applicableSlotsPerRow, pad + 1, aspacing);
                 int y = EnchantmentScrollContent.gridY(i, applicableSlotsPerRow, aiy + 1, aspacing);
-                applicableSlots.get(i).setPosition(x, y);
-                applicableSlots.get(i).draw(g);
+                IRecipeSlotDrawable slot = applicableSlots.get(i);
+                slot.setPosition(x, y);
+                slot.draw(g, slot.isMouseOver(mouseX, adjY));
             }
 
             // exclusive items
@@ -116,8 +119,9 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                 for (int i = 0; i < exclusiveSlots.size(); i++) {
                     int x = EnchantmentScrollContent.gridX(i, exclusiveSlotsPerRow, pad + 1, spacing);
                     int y = EnchantmentScrollContent.gridY(i, exclusiveSlotsPerRow, ciy + 1, spacing);
-                    exclusiveSlots.get(i).setPosition(x, y);
-                    exclusiveSlots.get(i).draw(g);
+                    IRecipeSlotDrawable slot = exclusiveSlots.get(i);
+                    slot.setPosition(x, y);
+                    slot.draw(g, slot.isMouseOver(mouseX, adjY));
                 }
             } else {
                 EnchantmentScrollContent.renderScrollingString(g, font,
@@ -129,13 +133,6 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         }
 
         scrollContext.drawScrollbar(g);
-    }
-
-    @Override
-    public void getTooltip(ITooltipBuilder tooltip, double mouseX, double mouseY) {
-        getSlotUnderMouse(mouseX, mouseY).ifPresent(
-                slotUnderMouse -> slotUnderMouse.slot().getTooltip(tooltip)
-        );
     }
 
     @Override
@@ -178,7 +175,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
     }
 
     @Override
-    public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollDeltaY) {
+    public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollDeltaX, double scrollDeltaY) {
         return scrollContext.mouseScrolled(scrollDeltaY);
     }
 

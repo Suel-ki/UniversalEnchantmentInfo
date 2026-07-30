@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
 
-    private static final ResourceLocation UID = new ResourceLocation(Uei.MOD_ID, "ench_info");
+    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "ench_info");
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {

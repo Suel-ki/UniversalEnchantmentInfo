@@ -175,9 +175,9 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (containsMouse(mouseX, mouseY)) {
-            boolean handled = scrollContext.mouseScrolled(amount);
+            boolean handled = scrollContext.mouseScrolled(scrollY);
             if (handled) {
                 updateSlotPositions(scrollContext.scrollAmountInt());
             }

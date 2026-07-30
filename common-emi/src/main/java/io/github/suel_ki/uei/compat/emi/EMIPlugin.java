@@ -7,14 +7,13 @@ import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiStack;
 import io.github.suel_ki.uei.Uei;
 import io.github.suel_ki.uei.ench.EnchantmentDataFactory;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 
 @EmiEntrypoint
 public class EMIPlugin implements EmiPlugin {
     public static final EmiRecipeCategory ENCHANTMENT_CATEGORY = new EnchantmentRecipeCategory(
-            new ResourceLocation(Uei.MOD_ID, "ench_info"), EmiStack.of(Items.ENCHANTED_BOOK));
+            ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "ench_info"), EmiStack.of(Items.ENCHANTED_BOOK));
 
     @Override
     public void register(EmiRegistry registry) {
@@ -23,13 +22,16 @@ public class EMIPlugin implements EmiPlugin {
         registry.addWorkstation(EMIPlugin.ENCHANTMENT_CATEGORY, EmiStack.of(Items.ENCHANTED_BOOK));
 
         for (var recipe : EnchantmentDataFactory.getOrComputeRecipes()) {
-            var id = BuiltInRegistries.ENCHANTMENT.getKey(recipe.enchantment());
-            if (id != null) {
-                registry.addRecipe(new EmiEnchantmentRecipe(
-                        new ResourceLocation(Uei.MOD_ID, String.format("/%s/%s", id.getNamespace(), id.getPath())),
-                        recipe
-                ));
-            }
+            recipe.enchantment().unwrapKey().ifPresent(key -> {
+                ResourceLocation id = key.location();
+
+                ResourceLocation recipeId = ResourceLocation.fromNamespaceAndPath(
+                        Uei.MOD_ID,
+                        String.format("/%s/%s", id.getNamespace(), id.getPath())
+                );
+
+                registry.addRecipe(new EmiEnchantmentRecipe(recipeId, recipe));
+            });
         }
     }
 }

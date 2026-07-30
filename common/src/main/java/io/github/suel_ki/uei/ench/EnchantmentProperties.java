@@ -1,11 +1,13 @@
 package io.github.suel_ki.uei.ench;
 
 import io.github.suel_ki.uei.config.Config;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantment;
-
-import java.util.Locale;
 
 public record EnchantmentProperties(
         String descriptionId,
@@ -14,57 +16,46 @@ public record EnchantmentProperties(
         boolean treasureOnly,
         boolean tradeable,
         boolean discoverable,
-        RarityInfo rarity,
-        String category,
+        Component rarity,
         String modid
 ) {
 
-    public record RarityInfo(Component name, String rarityKey) {}
+    public static EnchantmentProperties of(Holder<Enchantment> holder) {
+        Enchantment enchantment = holder.value();
 
-    public static EnchantmentProperties of(Enchantment enchantment) {
-        Enchantment.Rarity rarity = enchantment.getRarity();
-        RarityInfo rarityInfo = new RarityInfo(
-                getRarityComponent(rarity),
-                rarity != null ? rarity.name() : "UNKNOWN"
-        );
+        ResourceLocation loc = holder.unwrapKey()
+                .map(ResourceKey::location)
+                .orElse(ResourceLocation.withDefaultNamespace("unknown"));
 
-        var key = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
+        int weight = enchantment.getWeight();
+
+        String descId = Util.makeDescriptionId("enchantment", loc);
 
         return new EnchantmentProperties(
-                enchantment.getDescriptionId(),
+                descId,
                 enchantment.getMaxLevel(),
-                enchantment.isCurse(),
-                enchantment.isTreasureOnly(),
-                enchantment.isTradeable(),
-                enchantment.isDiscoverable(),
-                rarityInfo,
-                enchantment.category.name().toLowerCase(Locale.ROOT),
-                key != null ? key.getNamespace() : "minecraft"
+                holder.is(EnchantmentTags.CURSE),
+                holder.is(EnchantmentTags.TREASURE),
+                holder.is(EnchantmentTags.TRADEABLE),
+                holder.is(EnchantmentTags.IN_ENCHANTING_TABLE),
+                rarityName(weight),
+                loc.getNamespace()
         );
     }
 
-    private static Component getRarityComponent(Enchantment.Rarity rarity) {
-        if (rarity == null) {
-            return Component.literal("UNKNOWN");
-        }
-        return switch (rarity) {
-            case COMMON -> Component.translatable("uei.rarity.common");
-            case UNCOMMON -> Component.translatable("uei.rarity.uncommon");
-            case RARE -> Component.translatable("uei.rarity.rare");
-            case VERY_RARE -> Component.translatable("uei.rarity.very_rare");
-            default -> Component.literal(rarity.name());
-        };
-    }
-
-    public int rarityColor() {
+    public static Component rarityName(int weight) {
         Config cfg = Config.get();
-        return switch (rarity.rarityKey()) {
-            case "COMMON" -> cfg.rarityColorCommon;
-            case "UNCOMMON" -> cfg.rarityColorUncommon;
-            case "RARE" -> cfg.rarityColorRare;
-            case "VERY_RARE" -> cfg.rarityColorVeryRare;
-            default -> 0xFFFFFF;
-        };
+        Component name;
+        if (weight >= 10) {
+            name = Component.translatable("uei.rarity.common").withColor(cfg.rarityColorCommon);
+        } else if (weight >= 5) {
+            name = Component.translatable("uei.rarity.uncommon").withColor(cfg.rarityColorUncommon);
+        } else if (weight >= 2) {
+            name = Component.translatable("uei.rarity.rare").withColor(cfg.rarityColorRare);
+        } else {
+            name = Component.translatable("uei.rarity.very_rare").withColor(cfg.rarityColorVeryRare);
+        }
+        return name;
     }
 
 }
