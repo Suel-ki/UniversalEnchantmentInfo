@@ -15,8 +15,7 @@ dependencies {
 //    modCompileOnlyApi "dev.emi:emi-xplat-mojmap:${emi_version}"
 
     // https://github.com/TerraformersMC/ModMenu/issues/1069
-    modCompileOnlyApi files("libs/emi-forge-1.1.24+1.20.1.jar")
-    modCompileOnlyApi files("libs/emi-forge-1.1.24+1.20.1-api.jar")
+    modCompileOnlyApi files("libs/emi-1.1.24+1.21.1+neoforge.jar")
 
     modCompileOnlyApi "mezz.jei:jei-${minecraft_version}-common:${jei_version}"
 }

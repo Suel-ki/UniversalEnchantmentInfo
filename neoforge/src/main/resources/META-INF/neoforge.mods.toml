@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "${forge_loader_version_range}"
+loaderVersion = "${neoforge_loader_version_range}"
 license = "${license}"
 issueTrackerURL="https://github.com/Suel-ki/UniversalEnchantmentInfo/issues"
 
@@ -12,37 +12,41 @@ description = '''${mod_description}'''
 logoFile = "logo.png"
 displayURL="https://github.com/Suel-ki/UniversalEnchantmentInfo"
 
+[[mixins]]
+config = "uei.emi.mixins.json"
+
 [[dependencies.${mod_id}]]
-modId = "forge"
-mandatory = true
-versionRange = "${forge_version_range}"
+modId="neoforge"
+type="required"
+versionRange = "${neoforge_version_range}"
 ordering = "AFTER"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"
-mandatory = true
+type="required"
 versionRange = "${minecraft_version}"
 ordering = "AFTER"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]
 modId="emi"
-mandatory=false
+type="optional"
 versionRange="${emi_version_range}"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="jei"
-mandatory=false
+type="optional"
 versionRange="${jei_version_range}"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="rei"
-mandatory=false
+type="optional"
 versionRange="${rei_version_range}"
 ordering="AFTER"
 side="BOTH"
+

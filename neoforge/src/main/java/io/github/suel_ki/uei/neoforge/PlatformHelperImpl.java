@@ -1,8 +1,8 @@
-package io.github.suel_ki.uei.forge;
+package io.github.suel_ki.uei.neoforge;
 
 import net.minecraft.client.resources.language.I18n;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 

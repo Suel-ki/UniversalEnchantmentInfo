@@ -5,7 +5,7 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    forge()
+    neoForge()
 }
 
 def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
@@ -14,15 +14,6 @@ def rei_available = rei_enabled == "true" && project.findProperty("${project.nam
 
 loom {
     // accessWidenerPath = project(":common").loom.accessWidenerPath
-
-    forge {
-        // convertAccessWideners = true
-        // extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        if (emi_available) {
-            mixinConfig "uei.emi.mixins.json"
-        }
-    }
 }
 
 configurations {
@@ -30,31 +21,38 @@ configurations {
     shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    developmentNeoForge.extendsFrom common
+}
+
+repositories {
+    maven {
+        name = "NeoForge Maven"
+        url = "https://maven.neoforged.net/releases/"
+    }
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     if (emi_available) {
         common(project(path: ":common-emi", configuration: "namedElements")) { transitive false }
-        shadowCommon(project(path: ":common-emi", configuration: "transformProductionForge")) { transitive = false }
+        shadowCommon(project(path: ":common-emi", configuration: "transformProductionNeoForge")) { transitive = false }
     }
     if (jei_available) {
         common(project(path: ":common-jei", configuration: "namedElements")) { transitive false }
-        shadowCommon(project(path: ":common-jei", configuration: "transformProductionForge")) { transitive = false }
+        shadowCommon(project(path: ":common-jei", configuration: "transformProductionNeoForge")) { transitive = false }
     }
     if (rei_available) {
         common(project(path: ":common-rei", configuration: "namedElements")) { transitive false }
-        shadowCommon(project(path: ":common-rei", configuration: "transformProductionForge")) { transitive = false }
+        shadowCommon(project(path: ":common-rei", configuration: "transformProductionNeoForge")) { transitive = false }
     }
 }
 
 processResources {
-    filesMatching(["META-INF/mods.toml", "pack.mcmeta"]) {
+    filesMatching(["META-INF/neoforge.mods.toml"]) {
         expand project.ext.expandProps
     }
 }
@@ -98,12 +96,12 @@ publishing {
 
 publishMods {
     file = tasks.remapJar.archiveFile
-    displayName = "[Forge ${project.minecraft_version}] v${project.version}"
+    displayName = "[NeoForge ${project.minecraft_version}] v${project.version}"
     changelog = rootProject.file("docs/CHANGELOGS.md").exists()
         ? rootProject.file("docs/CHANGELOGS.md").text
         : ""
     type = STABLE
-    modLoaders.add("forge")
+    modLoaders.add("neoforge")
 
     curseforge {
         projectId = "1630244"

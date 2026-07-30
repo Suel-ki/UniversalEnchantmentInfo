@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
     id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
 
@@ -43,9 +43,9 @@ subprojects {
             "license"                   : license,
             "java_version"              : java_version,
             "minecraft_version"         : minecraft_version,
-            "forge_version"             : forge_version,
-            "forge_loader_version_range": forge_loader_version_range,
-            "forge_version_range"       : forge_version_range,
+            "neoforge_version"             : neoforge_version,
+            "neoforge_loader_version_range": neoforge_loader_version_range,
+            "neoforge_version_range"       : neoforge_version_range,
             "fabric_loader_version"     : fabric_loader_version,
             "emi_version_range"         : emi_version_range,
             "emi_version_range_fabric"  : emi_version_range_fabric,
