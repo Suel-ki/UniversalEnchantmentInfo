@@ -15,15 +15,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      mc_version: ${{ steps.config.outputs.mc_version }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Detect config
+        id: config
+        run: |
+          JAVA=$(grep '^java_version=' gradle.properties | cut -d= -f2)
+          MC=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
+          echo "java_version=$JAVA" >> "$GITHUB_OUTPUT"
+          echo "mc_version=$MC" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
+          java-version: "${{ steps.config.outputs.java_version }}"
           distribution: temurin
 
       - name: Cache Gradle
@@ -62,14 +72,14 @@ jobs:
       - name: Push version tag
         if: github.event_name == 'workflow_dispatch'
         run: |
-          git tag "v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          git tag "v${{ needs.build.outputs.mc_version }}-${{ inputs.version }}"
+          git push origin "v${{ needs.build.outputs.mc_version }}-${{ inputs.version }}"
 
       - name: Create draft release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           body_path: CHANGELOG.md
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}-{1}', needs.build.outputs.mc_version, inputs.version) || github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
