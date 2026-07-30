@@ -22,7 +22,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     private final Bounds bounds;
     private final int applicableSlotCount;
     private final int applicableSlotsPerRow;
-    private final int exclusivelotsPerRow;
+    private final int exclusiveSlotsPerRow;
     private final List<FormattedCharSequence> descLines;
 
     private final ScrollContext scrollContext;
@@ -33,7 +33,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
         this.bounds = new Bounds(x, y, width, height);
         this.applicableSlotCount = applicableSlotCount;
         this.applicableSlotsPerRow = applicableSlotsPerRow;
-        this.exclusivelotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(width, EnchantmentScrollContent.TRACK_WIDTH);
+        this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(width, EnchantmentScrollContent.TRACK_WIDTH);
         this.descLines = recipe.descriptionLines(Minecraft.getInstance().font);
         this.scrollContext = new ScrollContext(x, y, width, height, this::maxScroll);
     }
@@ -49,7 +49,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
 
     private int maxScroll() {
         return EnchantmentScrollContent.maxScroll(
-                recipe, applicableRows(), recipe.exclusiveStacks().size(), exclusivelotsPerRow, bounds.height());
+                recipe, applicableRows(), recipe.exclusiveStacks().size(), exclusiveSlotsPerRow, bounds.height());
     }
 
     private float getScrollAmount() {
