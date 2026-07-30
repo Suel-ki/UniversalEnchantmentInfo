@@ -12,6 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
@@ -30,15 +32,6 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     private final Rectangle bounds;
     private final ScrollContext scrollContext;
 
-    private final EnchantmentScrollContent.ScissorRenderer scissorRenderer = (g, font, text, minX, minY, maxX, maxY, color, offset) -> {
-        try (var ignored = scissor(g, new Rectangle(minX, minY, maxX - minX, font.lineHeight))) {
-            g.pose().pushPose();
-            g.pose().translate(minX - offset, (float) minY, 0.0F);
-            g.drawString(font, text, 0, 0, color, false);
-            g.pose().popPose();
-        }
-    };
-
     public ReiEnchantmentScrollWidget(EnchantmentRecipeData recipe, Rectangle bounds,
                                       List<Slot> exclusiveSlots, List<Slot> applicableSlots,
                                       int applicableSlotCount, int applicableSlotsPerRow) {
@@ -51,8 +44,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
         this.children.addAll(applicableSlots);
         this.children.addAll(exclusiveSlots);
 
-        int areaW = bounds.width - EnchantmentUIRenderer.PADDING;
-        this.exclusiveSlotsPerRow = Math.max(areaW / EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING, 1);
+        this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(bounds.width, 0);
         this.applicableSlotCount = applicableSlotCount;
         this.applicableSlotsPerRow = applicableSlotsPerRow;
 
@@ -149,7 +141,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
 
             int contentRight = scrollContext.contentRight();
             int aiyY = EnchantmentScrollContent.drawInfoLines(g, font, recipe, descLines,
-                    innerBounds.x, cy, pad, contentRight - pad, scissorRenderer);
+                    innerBounds.x, cy, pad, contentRight - pad);
 
             for (Slot slot : applicableSlots) {
                 slot.render(g, mouseX, mouseY, delta);
@@ -159,7 +151,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
             if (!exclusiveSlots.isEmpty()) {
                 EnchantmentScrollContent.drawExclusiveHeader(g, font,
                         innerBounds.x + pad, chy, contentRight,
-                        EnchantmentScrollContent.EXCLUSIVE_HEADER, exclusiveSlots.size(), scissorRenderer);
+                        EnchantmentScrollContent.EXCLUSIVE_HEADER, exclusiveSlots.size());
 
                 for (Slot slot : exclusiveSlots) {
                     slot.render(g, mouseX, mouseY, delta);
@@ -167,7 +159,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
             } else {
                 EnchantmentScrollContent.renderScrollingString(g, font,
                         EnchantmentScrollContent.NO_EXCLUSIVES,
-                        innerBounds.x + pad, chy, contentRight, chy + font.lineHeight, -1, scissorRenderer);
+                        innerBounds.x + pad, chy, contentRight, chy + font.lineHeight, -1);
             }
         }
 
@@ -187,32 +179,32 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean handled = scrollContext.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        boolean handled = scrollContext.mouseClicked(event.x(), event.y(), event.button());
         if (handled) {
             updateSlotPositions(scrollContext.scrollAmountInt());
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        boolean handled = scrollContext.mouseDragged(mouseX, mouseY, button);
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        boolean handled = scrollContext.mouseDragged(event.x(), event.y(), event.button());
         if (handled) {
             updateSlotPositions(scrollContext.scrollAmountInt());
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener child : this.children()) {
-            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+            if (child.keyPressed(event)) {
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 }

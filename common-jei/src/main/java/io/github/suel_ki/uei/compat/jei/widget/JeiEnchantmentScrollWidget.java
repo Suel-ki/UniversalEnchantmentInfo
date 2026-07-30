@@ -1,7 +1,6 @@
 package io.github.suel_ki.uei.compat.jei.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
@@ -14,7 +13,6 @@ import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.common.Internal;
 import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.common.util.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -55,9 +53,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
 
         this.contentsArea = new ImmutableRect2i(0, 0, width - EnchantmentScrollContent.TRACK_WIDTH, height);
 
-        int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
-        int areaW = contentsArea.width() - EnchantmentUIRenderer.PADDING;
-        this.exclusiveSlotsPerRow = Math.max(areaW / spacing, 1);
+        this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(contentsArea.width(), 0);
         this.applicableSlotCount = applicableSlotCount;
         this.applicableSlotsPerRow = applicableSlotsPerRow;
 
@@ -85,12 +81,11 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         float totalScroll = scrollContext.scrollAmount();
         double adjY = mouseY + totalScroll;
 
-        PoseStack poseStack = g.pose();
-        ScreenRectangle scissorBounds = MathUtil.transform(contentsArea, poseStack.last().pose());
-        try (var ignored = ScissorHelper.scissorScreen(g, scissorBounds.left(), scissorBounds.top(), scissorBounds.right(), scissorBounds.bottom())) {
+        var poseStack = g.pose();
+        try (var ignored = ScissorHelper.scissor(g, contentsArea.x(), contentsArea.y(), contentsArea.width(), contentsArea.height())) {
 
-            poseStack.pushPose();
-            poseStack.translate(0, -scrollContext.scrollAmount(), 0);
+            poseStack.pushMatrix();
+            poseStack.translate(0, -scrollContext.scrollAmount());
 
             EnchantmentScrollContent.drawDescription(g, font, descLines, 0, 0, pad);
 
@@ -129,7 +124,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                         pad, chy, contentWidth, chy + font.lineHeight, -1, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
             }
 
-            poseStack.popPose();
+            poseStack.popMatrix();
         }
 
         scrollContext.drawScrollbar(g);

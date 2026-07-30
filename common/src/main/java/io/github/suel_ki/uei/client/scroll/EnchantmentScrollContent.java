@@ -5,7 +5,6 @@ import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -67,6 +67,11 @@ public final class EnchantmentScrollContent {
     }
 
     public static void renderScrollingString(GuiGraphics g, Font font, Component text,
+                                             int minX, int minY, int maxX, int maxY, int color) {
+        renderScrollingString(g, font, text, minX, minY, maxX, maxY, color, UNIVERSAL_SCISSOR);
+    }
+
+    public static void renderScrollingString(GuiGraphics g, Font font, Component text,
                                              int minX, int minY, int maxX, int maxY, int color,
                                              ScissorRenderer scissorRenderer) {
         int textWidth = font.width(text);
@@ -87,10 +92,10 @@ public final class EnchantmentScrollContent {
 
     public static final ScissorRenderer UNIVERSAL_SCISSOR = (g, font, text, minX, minY, maxX, maxY, color, offset) -> {
         try (var ignored = ScissorHelper.scissor(g, minX, minY, maxX, maxY)) {
-            g.pose().pushPose();
-            g.pose().translate(minX - offset, (float) minY, 0.0F);
+            g.pose().pushMatrix();
+            g.pose().translate(minX - offset, (float) minY);
             g.drawString(font, text, 0, 0, color, false);
-            g.pose().popPose();
+            g.pose().popMatrix();
         }
     };
 
@@ -102,6 +107,11 @@ public final class EnchantmentScrollContent {
         int availableWidth = maxX - startX;
         renderScrollingString(g, font, value, startX, y,
                 startX + availableWidth, y + font.lineHeight, valueColor, scissorRenderer);
+    }
+
+    public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
+                                           Component header, int exclusiveCount) {
+        drawExclusiveHeader(g, font, x, y, maxX, header, exclusiveCount, UNIVERSAL_SCISSOR);
     }
 
     public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
@@ -126,6 +136,12 @@ public final class EnchantmentScrollContent {
         for (int i = 0; i < descLines.size(); i++) {
             g.drawString(font, descLines.get(i), x + pad, descTextY + i * lh, -1, false);
         }
+    }
+
+    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
+                                    List<FormattedCharSequence> descLines,
+                                    int x, int y, int pad, int maxX) {
+        return drawInfoLines(g, font, recipe, descLines, x, y, pad, maxX, UNIVERSAL_SCISSOR);
     }
 
     public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,

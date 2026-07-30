@@ -7,7 +7,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +15,10 @@ import org.jetbrains.annotations.NotNull;
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(Uei.MOD_ID, "ench_info");
+    private static final Identifier UID = Identifier.fromNamespaceAndPath(Uei.MOD_ID, "ench_info");
 
     @Override
-    public @NotNull ResourceLocation getPluginUid() {
+    public @NotNull Identifier getPluginUid() {
         return UID;
     }
 
@@ -34,6 +34,6 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(Items.ENCHANTED_BOOK), EnchantmentRecipeCategory.TYPE);
+        registration.addCraftingStation(EnchantmentRecipeCategory.TYPE, new ItemStack(Items.ENCHANTED_BOOK));
     }
 }

@@ -5,12 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,14 @@ import java.util.Map;
 public class EnchantmentDataFactory {
 
     private static List<EnchantmentRecipeData> CACHED_RECIPES = null;
+
+    public static ItemStack createEnchantedBook(Holder<Enchantment> enchantment, int level) {
+        ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
+        ItemEnchantments.Mutable storedEnchantments = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+        storedEnchantments.set(enchantment, level);
+        book.set(DataComponents.STORED_ENCHANTMENTS, storedEnchantments.toImmutable());
+        return book;
+    }
 
     public static List<EnchantmentRecipeData> getOrComputeRecipes() {
         if (CACHED_RECIPES != null) {
@@ -32,14 +41,14 @@ public class EnchantmentDataFactory {
         }
 
         RegistryAccess registryAccess = mc.level.registryAccess();
-        Registry<Enchantment> enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
 
-        List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.holders().toList();
+        List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.listElements().toList();
         int maxItems = Config.get().maxApplicableItems;
 
         Map<Holder<Enchantment>, ItemStack> maxLevelBookCache = new HashMap<>(allEnchantments.size());
         for (Holder.Reference<Enchantment> e : allEnchantments) {
-            maxLevelBookCache.put(e, EnchantedBookItem.createForEnchantment(new EnchantmentInstance(e, e.value().getMaxLevel())));
+            maxLevelBookCache.put(e, createEnchantedBook(e, e.value().getMaxLevel()));
         }
 
         List<EnchantmentRecipeData> recipes = new ArrayList<>(allEnchantments.size());

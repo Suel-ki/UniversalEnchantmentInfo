@@ -8,14 +8,14 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.github.suel_ki.uei.ench.EnchantmentDataFactory.createEnchantedBook;
 
 public record EnchantmentRecipeData(
         Holder<Enchantment> enchantment,
@@ -74,11 +74,11 @@ public record EnchantmentRecipeData(
         String modId = props.modid();
         Component modName = Component.literal(PlatformHelper.getModName(modId)).withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE);
 
-        ItemStack book = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(holder, props.maxLevel()));
+        ItemStack book = createEnchantedBook(holder, props.maxLevel());
 
         List<ItemStack> allLevels = new ArrayList<>(props.maxLevel());
         for (int lvl = 1; lvl < props.maxLevel(); lvl++) {
-            allLevels.add(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(holder, lvl)));
+            allLevels.add(createEnchantedBook(holder, lvl));
         }
         allLevels.add(book);
 

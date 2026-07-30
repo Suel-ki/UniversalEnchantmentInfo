@@ -110,7 +110,7 @@ public class ConfigScreen extends Screen {
         }
 
         @Override
-        protected int getScrollbarPosition() {
+        protected int scrollBarX() {
             return this.width / 2 + 160;
         }
 
@@ -206,25 +206,29 @@ public class ConfigScreen extends Screen {
             }
 
             @Override
-            public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+                int x = this.getX();
+                int y = this.getY();
+                int width = this.getWidth();
+                int height = this.getHeight();
                 if (isMouseOver) {
-                    graphics.fill(left, top - 2, left + width, top + height - 2, 0x1AFFFFFF);
+                    graphics.fill(x, y - 2, x + width, y + height - 2, 0x1AFFFFFF);
                 }
-                graphics.drawString(this.font, this.label, left + width / 2 - 10 - this.font.width(this.label), top + 6, 0xFFFFFFFF);
-                this.valueWidget.setY(top);
-                this.valueWidget.setX(left + width / 2 + 10);
-                this.resetButton.setY(top);
-                this.resetButton.setX(left + width / 2 + (isColor ? 104 : 92));
+                graphics.drawString(this.font, this.label, x + width / 2 - 10 - this.font.width(this.label), y + 6, 0xFFFFFFFF);
+                this.valueWidget.setY(y);
+                this.valueWidget.setX(x + width / 2 + 10);
+                this.resetButton.setY(y);
+                this.resetButton.setX(x + width / 2 + (isColor ? 104 : 92));
                 this.valueWidget.render(graphics, mouseX, mouseY, partialTick);
                 this.resetButton.render(graphics, mouseX, mouseY, partialTick);
                 if (isColor && valid) {
-                    int cx = left + width / 2 + 93;
-                    int cy = top + 5;
+                    int cx = x + width / 2 + 93;
+                    int cy = y + 5;
                     graphics.fill(cx, cy, cx + 10, cy + 10, colorPreview);
                 }
                 if (this.valueWidget.isMouseOver(mouseX, mouseY)) {
                     Component tooltip = getTooltip();
-                    if (tooltip != null) graphics.renderTooltip(this.font, tooltip, mouseX, mouseY);
+                    if (tooltip != null) graphics.setTooltipForNextFrame(this.font, tooltip, mouseX, mouseY);
                 }
             }
 

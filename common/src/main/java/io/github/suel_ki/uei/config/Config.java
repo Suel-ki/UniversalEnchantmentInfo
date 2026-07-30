@@ -81,7 +81,7 @@ public class Config {
     public int rarityColorRare = 5592575;
 
     @ConfigSpec(min = 0, max = 16777215, isColor = true)
-    public int rarityColorVeryRare = 16755200;
+    public int rarityColorEpic = 16733695;
 
     public static Config get() {
         return INSTANCE;
