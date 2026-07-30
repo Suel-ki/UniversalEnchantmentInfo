@@ -17,10 +17,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Detect platform from tag
+        id: config
+        run: |
+          # Read from the tagged code, not the default branch
+          git checkout "${{ github.ref_name }}"
+
+          MC=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
+          JAVA=$(grep '^java_version=' gradle.properties | cut -d= -f2)
+          MC_MAJOR=$(echo "$MC" | cut -d. -f1)
+          MC_MINOR=$(echo "$MC" | cut -d. -f2)
+
+          echo "mc_version=$MC" >> "$GITHUB_OUTPUT"
+          echo "java_version=$JAVA" >> "$GITHUB_OUTPUT"
+
+          if [ "$MC_MAJOR" -gt 1 ] || [ "$MC_MINOR" -ge 21 ]; then
+            echo "loader=neoforge" >> "$GITHUB_OUTPUT"
+          else
+            echo "loader=forge" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
+          java-version: "${{ steps.config.outputs.java_version }}"
           distribution: temurin
 
       - name: Cache Gradle
@@ -41,7 +61,7 @@ jobs:
         run: |
           gh release upload "${{ github.ref_name }}" \
             fabric/build/libs/*-fabric-[0-9]*[0-9].jar \
-            forge/build/libs/*-forge-[0-9]*[0-9].jar
+            ${{ steps.config.outputs.loader }}/build/libs/*-${{ steps.config.outputs.loader }}-[0-9]*[0-9].jar
 
       - name: Save changelog for publish
         run: |
@@ -58,8 +78,8 @@ jobs:
       - name: Update changelog
         run: |
           TAG="${{ github.ref_name }}"
-          BRANCH=$(echo "$TAG" | grep -oP 'v\K\d+\.\d+\.\d+(?=-)')
-          BRANCH="${BRANCH:-1.20.1}"
+          MC="${{ steps.config.outputs.mc_version }}"
+          BRANCH="$MC"
 
           git fetch origin "$BRANCH"
           git checkout -f "$BRANCH"
