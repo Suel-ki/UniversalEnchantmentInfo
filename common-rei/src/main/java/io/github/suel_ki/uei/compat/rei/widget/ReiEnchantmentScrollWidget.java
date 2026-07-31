@@ -12,8 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
@@ -179,32 +177,32 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        boolean handled = scrollContext.mouseClicked(event.x(), event.y(), event.button());
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean handled = scrollContext.mouseClicked(mouseX, mouseY, button);
         if (handled) {
             updateSlotPositions(scrollContext.scrollAmountInt());
             return true;
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        boolean handled = scrollContext.mouseDragged(event.x(), event.y(), event.button());
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        boolean handled = scrollContext.mouseDragged(mouseX, mouseY, button);
         if (handled) {
             updateSlotPositions(scrollContext.scrollAmountInt());
             return true;
         }
-        return super.mouseDragged(event, deltaX, deltaY);
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         for (GuiEventListener child : this.children()) {
-            if (child.keyPressed(event)) {
+            if (child.keyPressed(keyCode, scanCode, modifiers)) {
                 return true;
             }
         }
-        return super.keyPressed(event);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

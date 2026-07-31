@@ -22,16 +22,13 @@
     "modmenu": [
       "io.github.suel_ki.uei.fabric.modmenu.ModMenuIntegration"
     ],
-    "jei_mod_plugin": [
-      "io.github.suel_ki.uei.compat.jei.JEIPlugin"
-    ],
     "rei_client": [
       "io.github.suel_ki.uei.compat.rei.REIPlugin"
     ]
   },
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
-    "minecraft": ">=1.21.9",
+    "minecraft": ">=1.21.6",
     "java": ">=${java_version}"
   },
   "suggests": {
