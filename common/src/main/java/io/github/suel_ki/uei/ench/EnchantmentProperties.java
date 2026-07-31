@@ -1,12 +1,12 @@
 package io.github.suel_ki.uei.ench;
 
 import io.github.suel_ki.uei.config.Config;
+import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public record EnchantmentProperties(
@@ -23,9 +23,9 @@ public record EnchantmentProperties(
     public static EnchantmentProperties of(Holder<Enchantment> holder) {
         Enchantment enchantment = holder.value();
 
-        Identifier loc = holder.unwrapKey()
-                .map(ResourceKey::identifier)
-                .orElse(Identifier.withDefaultNamespace("unknown"));
+        ResourceLocation loc = holder.unwrapKey()
+                .map(ResourceKey::location)
+                .orElse(ResourceLocation.withDefaultNamespace("unknown"));
 
         int weight = enchantment.getWeight();
 

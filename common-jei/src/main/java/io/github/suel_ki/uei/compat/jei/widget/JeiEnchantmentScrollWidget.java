@@ -78,9 +78,6 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         int pad = EnchantmentUIRenderer.PADDING;
         int contentWidth = scrollContext.contentWidth();
 
-        float totalScroll = scrollContext.scrollAmount();
-        double adjY = mouseY + totalScroll;
-
         var poseStack = g.pose();
         try (var ignored = ScissorHelper.scissor(g, contentsArea.x(), contentsArea.y(), contentsArea.width(), contentsArea.height())) {
 
@@ -99,7 +96,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                 int y = EnchantmentScrollContent.gridY(i, applicableSlotsPerRow, aiy + 1, aspacing);
                 IRecipeSlotDrawable slot = applicableSlots.get(i);
                 slot.setPosition(x, y);
-                slot.draw(g, slot.isMouseOver(mouseX, adjY));
+                slot.draw(g);
             }
 
             // exclusive items
@@ -116,7 +113,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                     int y = EnchantmentScrollContent.gridY(i, exclusiveSlotsPerRow, ciy + 1, spacing);
                     IRecipeSlotDrawable slot = exclusiveSlots.get(i);
                     slot.setPosition(x, y);
-                    slot.draw(g, slot.isMouseOver(mouseX, adjY));
+                    slot.draw(g);
                 }
             } else {
                 EnchantmentScrollContent.renderScrollingString(g, font,

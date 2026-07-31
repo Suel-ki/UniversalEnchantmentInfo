@@ -2,10 +2,10 @@ name: Build & Draft Release
 
 on:
   push:
-    branches: [main, "1.21.11"]
+    branches: [main, "1.21.10"]
     tags: ["v*"]
   pull_request:
-    branches: [main, "1.21.11"]
+    branches: [main, "1.21.10"]
   workflow_dispatch:
     inputs:
       version:
