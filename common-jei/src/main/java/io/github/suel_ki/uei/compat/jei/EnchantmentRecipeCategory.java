@@ -14,8 +14,8 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,8 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRecipeData> {
-    public static final RecipeType<EnchantmentRecipeData> TYPE =
-            RecipeType.create(Uei.MOD_ID, "ench_info", EnchantmentRecipeData.class);
+    public static final IRecipeType<EnchantmentRecipeData> TYPE =
+            IRecipeType.create(Uei.MOD_ID, "ench_info", EnchantmentRecipeData.class);
 
     private final IDrawable icon;
     private final Component title;
@@ -39,7 +39,7 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
     }
 
     @Override
-    public @NotNull RecipeType<EnchantmentRecipeData> getRecipeType() {
+    public @NotNull IRecipeType<EnchantmentRecipeData> getRecipeType() {
         return TYPE;
     }
 
@@ -79,7 +79,7 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
 
         for (ItemStack exclusiveBook : recipe.exclusiveStacks()) {
             builder.addSlot(RecipeIngredientRole.INPUT)
-                    .addItemStack(exclusiveBook)
+                    .add(exclusiveBook)
                     .setStandardSlotBackground()
                     .setSlotName("exclusive_books");
         }

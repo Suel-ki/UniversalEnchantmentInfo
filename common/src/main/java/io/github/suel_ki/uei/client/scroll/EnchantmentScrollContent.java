@@ -67,6 +67,11 @@ public final class EnchantmentScrollContent {
     }
 
     public static void renderScrollingString(GuiGraphics g, Font font, Component text,
+                                             int minX, int minY, int maxX, int maxY, int color) {
+        renderScrollingString(g, font, text, minX, minY, maxX, maxY, color, UNIVERSAL_SCISSOR);
+    }
+
+    public static void renderScrollingString(GuiGraphics g, Font font, Component text,
                                              int minX, int minY, int maxX, int maxY, int color,
                                              ScissorRenderer scissorRenderer) {
         int textWidth = font.width(text);
@@ -105,6 +110,11 @@ public final class EnchantmentScrollContent {
     }
 
     public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
+                                           Component header, int exclusiveCount) {
+        drawExclusiveHeader(g, font, x, y, maxX, header, exclusiveCount, UNIVERSAL_SCISSOR);
+    }
+
+    public static void drawExclusiveHeader(GuiGraphics g, Font font, int x, int y, int maxX,
                                            Component header, int exclusiveCount,
                                            ScissorRenderer scissorRenderer) {
         Component count = Component.literal(String.valueOf(exclusiveCount))
@@ -126,6 +136,12 @@ public final class EnchantmentScrollContent {
         for (int i = 0; i < descLines.size(); i++) {
             g.drawString(font, descLines.get(i), x + pad, descTextY + i * lh, -1, false);
         }
+    }
+
+    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
+                                    List<FormattedCharSequence> descLines,
+                                    int x, int y, int pad, int maxX) {
+        return drawInfoLines(g, font, recipe, descLines, x, y, pad, maxX, UNIVERSAL_SCISSOR);
     }
 
     public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,

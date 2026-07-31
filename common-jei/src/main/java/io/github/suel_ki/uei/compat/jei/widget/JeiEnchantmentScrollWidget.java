@@ -14,7 +14,6 @@ import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.common.Internal;
 import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.common.util.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -55,9 +54,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
 
         this.contentsArea = new ImmutableRect2i(0, 0, width - EnchantmentScrollContent.TRACK_WIDTH, height);
 
-        int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
-        int areaW = contentsArea.width() - EnchantmentUIRenderer.PADDING;
-        this.exclusiveSlotsPerRow = Math.max(areaW / spacing, 1);
+        this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(contentsArea.width(), 0);
         this.applicableSlotCount = applicableSlotCount;
         this.applicableSlotsPerRow = applicableSlotsPerRow;
 
@@ -82,12 +79,8 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         int pad = EnchantmentUIRenderer.PADDING;
         int contentWidth = scrollContext.contentWidth();
 
-        float totalScroll = scrollContext.scrollAmount();
-        double adjY = mouseY + totalScroll;
-
         PoseStack poseStack = g.pose();
-        ScreenRectangle scissorBounds = MathUtil.transform(contentsArea, poseStack.last().pose());
-        try (var ignored = ScissorHelper.scissorScreen(g, scissorBounds.left(), scissorBounds.top(), scissorBounds.right(), scissorBounds.bottom())) {
+        try (var ignored = ScissorHelper.scissor(g, contentsArea.x(), contentsArea.y(), contentsArea.width(), contentsArea.height())) {
 
             poseStack.pushPose();
             poseStack.translate(0, -scrollContext.scrollAmount(), 0);
@@ -104,7 +97,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                 int y = EnchantmentScrollContent.gridY(i, applicableSlotsPerRow, aiy + 1, aspacing);
                 IRecipeSlotDrawable slot = applicableSlots.get(i);
                 slot.setPosition(x, y);
-                slot.draw(g, slot.isMouseOver(mouseX, adjY));
+                slot.draw(g);
             }
 
             // exclusive items
@@ -121,7 +114,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
                     int y = EnchantmentScrollContent.gridY(i, exclusiveSlotsPerRow, ciy + 1, spacing);
                     IRecipeSlotDrawable slot = exclusiveSlots.get(i);
                     slot.setPosition(x, y);
-                    slot.draw(g, slot.isMouseOver(mouseX, adjY));
+                    slot.draw(g);
                 }
             } else {
                 EnchantmentScrollContent.renderScrollingString(g, font,

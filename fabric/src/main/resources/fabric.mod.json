@@ -22,19 +22,10 @@
     "modmenu": [
       "io.github.suel_ki.uei.fabric.modmenu.ModMenuIntegration"
     ],
-    "emi": [
-      "io.github.suel_ki.uei.compat.emi.EMIPlugin"
-    ],
-    "jei_mod_plugin": [
-      "io.github.suel_ki.uei.compat.jei.JEIPlugin"
-    ],
     "rei_client": [
       "io.github.suel_ki.uei.compat.rei.REIPlugin"
     ]
   },
-  "mixins": [
-    "uei.emi.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "minecraft": "${minecraft_version}",

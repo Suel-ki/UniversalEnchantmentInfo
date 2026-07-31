@@ -110,7 +110,7 @@ public class ConfigScreen extends Screen {
         }
 
         @Override
-        protected int getScrollbarPosition() {
+        protected int scrollBarX() {
             return this.width / 2 + 160;
         }
 

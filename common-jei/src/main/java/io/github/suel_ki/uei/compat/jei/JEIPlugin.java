@@ -34,6 +34,6 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(Items.ENCHANTED_BOOK), EnchantmentRecipeCategory.TYPE);
+        registration.addCraftingStation(EnchantmentRecipeCategory.TYPE, new ItemStack(Items.ENCHANTED_BOOK));
     }
 }
