@@ -3,8 +3,8 @@ package io.github.suel_ki.uei.ench;
 import io.github.suel_ki.uei.PlatformHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -35,7 +35,7 @@ public record EnchantmentRecipeData(
         String descKey = enchantmentProperties.descriptionId() + ".desc";
         Component description;
 
-        if (I18n.exists(descKey)) {
+        if (Language.getInstance().has(descKey)) {
             description = Component.translatable(descKey).withStyle(ChatFormatting.BLACK);
         } else {
             description = Component.translatable("uei.no_description").withStyle(ChatFormatting.BLACK);

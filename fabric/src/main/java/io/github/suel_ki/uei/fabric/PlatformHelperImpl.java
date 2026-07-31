@@ -2,6 +2,7 @@ package io.github.suel_ki.uei.fabric;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 
 import java.nio.file.Path;
 
@@ -14,7 +15,7 @@ public class PlatformHelperImpl {
     public static String getModName(String modId) {
         String translationKey = String.format("modmenu.nameTranslation.%s", modId);
 
-        if (I18n.exists(translationKey)) {
+        if (Language.getInstance().has(translationKey)) {
             return I18n.get(translationKey);
         }
 

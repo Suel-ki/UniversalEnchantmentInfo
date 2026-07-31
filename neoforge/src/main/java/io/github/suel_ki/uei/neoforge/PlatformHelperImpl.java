@@ -1,6 +1,7 @@
 package io.github.suel_ki.uei.neoforge;
 
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -15,7 +16,7 @@ public class PlatformHelperImpl {
     public static String getModName(String modId) {
         String translationKey = String.format("modmenu.nameTranslation.%s", modId);
 
-        if (I18n.exists(translationKey)) {
+        if (Language.getInstance().has(translationKey)) {
             return I18n.get(translationKey);
         }
 

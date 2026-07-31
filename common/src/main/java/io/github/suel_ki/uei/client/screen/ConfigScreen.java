@@ -92,7 +92,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.setScreenAndShow(this.parent);
     }
 
     private static class ConfigList extends ContainerObjectSelectionList<ConfigList.Entry> {
