@@ -12,6 +12,10 @@ loom {
     // accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
+base {
+    archivesName = archives_base_name + "-" + minecraft_version + "-fabric"
+}
+
 def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
 def jei_available = jei_enabled == "true" && project.findProperty("${project.name}_jei_enabled") == "true"
 def rei_available = rei_enabled == "true" && project.findProperty("${project.name}_rei_enabled") == "true"
