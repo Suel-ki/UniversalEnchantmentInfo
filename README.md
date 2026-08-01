@@ -23,6 +23,7 @@ A JEI/REI/EMI plugin that displays detailed enchantment information.
 
 - **R key** — view enchantment info for enchanted book
 - **U key** — view info of exclusive enchantments for enchanted book
+- **U key on an item** — view all enchantments applicable to it
 
 ## Features
 
@@ -43,7 +44,6 @@ Configurable in-game: Fabric requires Mod Menu, while Forge and NeoForge use the
 | Scroll Speed          | `1.0`   | Panel scroll sensitivity           |
 | Text Scroll Speed     | `1.0`   | Long text auto-scroll multiplier   |
 | Applicable Item Slots | `4`     | Max displayed item slots           |
-| Applicable Item Limit | `100`   | Max collected applicable items     |
 | Text Boolean Display  | `false` | Use Yes/No instead of symbols      |
 | Show Rarity           | `true`  | Toggle rarity line                 |
 | Show Max Level        | `true`  | Toggle max level line              |
