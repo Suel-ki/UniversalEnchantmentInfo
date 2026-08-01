@@ -1,6 +1,5 @@
 package io.github.suel_ki.uei.ench;
 
-import io.github.suel_ki.uei.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -35,7 +34,6 @@ public class EnchantmentDataFactory {
         Registry<Enchantment> enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
 
         List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.holders().toList();
-        int maxItems = Config.get().maxApplicableItems;
 
         Map<Holder<Enchantment>, ItemStack> maxLevelBookCache = new HashMap<>(allEnchantments.size());
         for (Holder.Reference<Enchantment> e : allEnchantments) {
@@ -48,7 +46,6 @@ public class EnchantmentDataFactory {
             Enchantment enchantment = targetEnchantment.value();
 
             List<Holder<Item>> applicableList = enchantment.getSupportedItems().stream()
-                    .limit(maxItems)
                     .toList();
 
             List<ItemStack> exclusiveBooks = new ArrayList<>();
@@ -64,7 +61,8 @@ public class EnchantmentDataFactory {
             recipes.add(EnchantmentRecipeData.create(
                     targetEnchantment,
                     applicableList,
-                    exclusiveBooks
+                    exclusiveBooks,
+                    maxLevelBookCache.get(targetEnchantment)
             ));
         }
 

@@ -13,12 +13,11 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +73,7 @@ public class ReiEnchantmentCategory implements DisplayCategory<EnchantmentDispla
         }));
 
         widgets.add(Widgets.createSlot(new Point(sx + EnchantmentUIRenderer.SLOT_X + margin, topOff + EnchantmentUIRenderer.SLOT_Y))
-                .entries(EntryIngredients.of(recipe.enchantedBook()))
+                .entries(display.getBookIngredient())
                 .disableBackground()
                 .markOutput());
 
@@ -88,22 +87,21 @@ public class ReiEnchantmentCategory implements DisplayCategory<EnchantmentDispla
         List<Slot> applicableSlots = new ArrayList<>();
         List<Slot> exclusiveSlots = new ArrayList<>();
 
-        List<List<ItemStack>> batches = EnchantmentScrollContent.batchApplicableItems(recipe);
-        for (List<ItemStack> batch : batches) {
+        for (EntryIngredient batch : display.getBatchedApplicableIngredients()) {
             Slot slot = Widgets.createSlot(new Point(0, 0))
-                    .entries(EntryIngredients.ofItemStacks(batch));
+                    .entries(batch);
             applicableSlots.add(slot);
         }
 
-        for (ItemStack exclusiveBook : recipe.exclusiveStacks()) {
+        for (EntryIngredient exclusive : display.getExclusiveIngredients()) {
             Slot slot = Widgets.createSlot(new Point(0, 0))
-                    .entries(EntryIngredients.of(exclusiveBook))
+                    .entries(exclusive)
                     .markInput();
             exclusiveSlots.add(slot);
         }
 
         widgets.add(new ReiEnchantmentScrollWidget(recipe, scrollBounds, exclusiveSlots, applicableSlots,
-                batches.size(), applicableSlotsPerRow));
+                display.getBatchCount(), applicableSlotsPerRow));
         return widgets;
     }
 }
