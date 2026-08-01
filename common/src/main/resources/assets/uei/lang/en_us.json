@@ -34,7 +34,6 @@
   "uei.config.scroll_speed": "Scroll Speed",
   "uei.config.text_scroll_speed_multiplier": "Text Scroll Speed",
   "uei.config.max_applicable_slots": "Applicable Item Slots",
-  "uei.config.max_applicable_items": "Applicable Item Limit",
   "uei.config.use_text_for_booleans": "Text Boolean Display",
   "uei.config.show_rarity": "Show Rarity",
   "uei.config.show_max_level": "Show Max Level",
@@ -47,7 +46,7 @@
   "uei.config.rarity_color_uncommon": "Uncommon Color",
   "uei.config.rarity_color_rare": "Rare Color",
   "uei.config.rarity_color_very_rare": "Very Rare Color",
-  "uei.config.reload_notice": "Changes to Applicable Item Limit require reloading resources (F3+T or /reload)",
+  "uei.config.reload_notice": "Some changes require reloading resources (F3+T or /reload)",
   "uei.config.reset": "Reset",
   "uei.config.tooltip.range": "Valid: %s ~ %s",
   "uei.config.tooltip.invalid_format": "Please enter a valid number"

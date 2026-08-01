@@ -7,7 +7,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -24,8 +23,7 @@ public record EnchantmentRecipeData(
         Component localizedName,
         Component modName,
         List<ItemStack> exclusiveStacks,
-        List<Item> applicableItems
-
+        List<ItemStack> applicableStacks
 ) {
 
     private static final int MAX_DESC_WIDTH = 144;
@@ -79,14 +77,12 @@ public record EnchantmentRecipeData(
         return enchantmentProperties.rarityColor();
     }
 
-    public static EnchantmentRecipeData create(Enchantment enchantment, List<Item> applicableItems, List<ItemStack> exclusiveStacks) {
+    public static EnchantmentRecipeData create(Enchantment enchantment, List<ItemStack> applicableStacks,
+                                               List<ItemStack> exclusiveStacks, ItemStack maxLevelBook) {
         EnchantmentProperties props = EnchantmentProperties.of(enchantment);
 
         String modId = props.modid();
         Component modName = Component.literal(PlatformHelper.getModName(modId)).withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE);
-
-        ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
-        EnchantmentHelper.setEnchantments(java.util.Map.of(enchantment, props.maxLevel()), book);
 
         List<ItemStack> allLevels = new ArrayList<>(props.maxLevel());
         for (int lvl = 1; lvl < props.maxLevel(); lvl++) {
@@ -94,14 +90,13 @@ public record EnchantmentRecipeData(
             EnchantmentHelper.setEnchantments(java.util.Map.of(enchantment, lvl), lvlBook);
             allLevels.add(lvlBook);
         }
-        allLevels.add(book);
+        allLevels.add(maxLevelBook);
 
         MutableComponent name = Component.translatable(props.descriptionId())
                 .withStyle(props.curse() ? ChatFormatting.RED : ChatFormatting.WHITE);
         return new EnchantmentRecipeData(
-                enchantment, props, book, allLevels, name, modName,
-                exclusiveStacks, applicableItems
+                enchantment, props, maxLevelBook, allLevels, name, modName,
+                exclusiveStacks, applicableStacks
         );
     }
-
 }

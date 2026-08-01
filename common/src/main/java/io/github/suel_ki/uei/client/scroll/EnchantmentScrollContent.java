@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -237,31 +236,25 @@ public final class EnchantmentScrollContent {
 
     // Batch applicable items by max slot count, evenly distributed
     public static List<List<ItemStack>> batchApplicableItems(EnchantmentRecipeData recipe) {
-        List<Item> items = recipe.applicableItems();
-        int itemsSize = items.size();
+        List<ItemStack> stacks = recipe.applicableStacks();
+        int size = stacks.size();
         int maxSlots = Math.max(1, Config.get().maxApplicableSlots);
 
-        if (items.isEmpty()) {
+        if (stacks.isEmpty()) {
             return Collections.emptyList();
         }
 
-        int slots = Math.min(itemsSize, maxSlots);
+        int slots = Math.min(size, maxSlots);
         List<List<ItemStack>> batches = new ArrayList<>(slots);
 
-        int base = itemsSize / slots;
-        int remainder = itemsSize % slots;
+        int base = size / slots;
+        int remainder = size % slots;
 
         int idx = 0;
         for (int i = 0; i < slots; i++) {
             int currentBatchSize = base + (i < remainder ? 1 : 0);
 
-            List<ItemStack> currentBatch = new ArrayList<>(currentBatchSize);
-
-            for (int j = 0; j < currentBatchSize; j++) {
-                currentBatch.add(items.get(idx + j).getDefaultInstance());
-            }
-
-            batches.add(currentBatch);
+            batches.add(stacks.subList(idx, idx + currentBatchSize));
             idx += currentBatchSize;
         }
 

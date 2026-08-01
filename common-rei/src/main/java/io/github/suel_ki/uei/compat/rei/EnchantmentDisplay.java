@@ -15,7 +15,10 @@ public class EnchantmentDisplay implements Display {
 
     public EnchantmentDisplay(EnchantmentRecipeData recipe) {
         this.recipe = recipe;
-        this.inputs = List.of(EntryIngredients.ofItemStacks(recipe.exclusiveStacks()));
+        this.inputs = List.of(
+                EntryIngredients.ofItemStacks(recipe.exclusiveStacks()),
+                EntryIngredients.ofItemStacks(recipe.applicableStacks())
+        );
         this.outputs = List.of(EntryIngredients.ofItemStacks(recipe.allLevelBooks()));
     }
 

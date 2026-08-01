@@ -1,6 +1,5 @@
 package io.github.suel_ki.uei.ench;
 
-import io.github.suel_ki.uei.config.Config;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -22,58 +21,45 @@ public class EnchantmentDataFactory {
             return CACHED_RECIPES;
         }
 
-        int maxItems = Config.get().maxApplicableItems;
+        List<Enchantment> allEnchantments = BuiltInRegistries.ENCHANTMENT.stream().toList();
 
-        List<Item> validItems = new ArrayList<>();
-        for (Item item : BuiltInRegistries.ITEM) {
-            ItemStack tempStack = item.getDefaultInstance();
-            if (!tempStack.isEmpty() && (tempStack.isEnchantable() || item == Items.BOOK)) {
-                validItems.add(item);
-            }
-        }
+        List<ItemStack> validStacks = BuiltInRegistries.ITEM.stream()
+                .map(Item::getDefaultInstance)
+                .filter(stack -> !stack.isEmpty() && (stack.isEnchantable() || stack.getItem() == Items.BOOK))
+                .toList();
 
-        Map<Enchantment, ItemStack> maxLevelBookCache = new HashMap<>();
-        for (Enchantment e : BuiltInRegistries.ENCHANTMENT) {
+        Map<Enchantment, ItemStack> maxLevelBookCache = new HashMap<>(allEnchantments.size());
+        for (Enchantment e : allEnchantments) {
             ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
             EnchantmentHelper.setEnchantments(Map.of(e, e.getMaxLevel()), book);
             maxLevelBookCache.put(e, book);
         }
 
-        Map<Enchantment, List<Item>> applicableMap = new HashMap<>();
-        for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-            List<Item> applicableList = new ArrayList<>();
+        List<EnchantmentRecipeData> recipes = new ArrayList<>(allEnchantments.size());
 
-            for (Item item : validItems) {
-                if (applicableList.size() >= maxItems) {
-                    break;
-                }
-                ItemStack testStack = item.getDefaultInstance();
-                if (enchantment.canEnchant(testStack)) {
-                    applicableList.add(item);
-                }
-            }
-            applicableMap.put(enchantment, applicableList);
-        }
+        List<List<ItemStack>> applicable = allEnchantments.stream()
+                .map(e -> validStacks.stream().filter(e::canEnchant).toList())
+                .toList();
 
-        Map<Enchantment, List<ItemStack>> exclusiveMap = new HashMap<>();
-        for (Enchantment targetEnchantment : BuiltInRegistries.ENCHANTMENT) {
+        for (int i = 0; i < allEnchantments.size(); i++) {
+            Enchantment targetEnchantment = allEnchantments.get(i);
+
             List<ItemStack> exclusiveBooks = new ArrayList<>();
-
-            for (Enchantment otherEnchantment : BuiltInRegistries.ENCHANTMENT) {
+            for (Enchantment otherEnchantment : allEnchantments) {
                 if (otherEnchantment != targetEnchantment && !targetEnchantment.isCompatibleWith(otherEnchantment)) {
                     exclusiveBooks.add(maxLevelBookCache.get(otherEnchantment));
                 }
             }
-            exclusiveMap.put(targetEnchantment, exclusiveBooks);
+
+            recipes.add(EnchantmentRecipeData.create(
+                    targetEnchantment,
+                    applicable.get(i),
+                    exclusiveBooks,
+                    maxLevelBookCache.get(targetEnchantment)
+            ));
         }
 
-        CACHED_RECIPES = BuiltInRegistries.ENCHANTMENT.stream()
-                .map(enchantment -> EnchantmentRecipeData.create(
-                        enchantment,
-                        applicableMap.getOrDefault(enchantment, List.of()),
-                        exclusiveMap.getOrDefault(enchantment, List.of())
-                ))
-                .toList();
+        CACHED_RECIPES = List.copyOf(recipes);
 
         return CACHED_RECIPES;
     }

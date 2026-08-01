@@ -44,9 +44,6 @@ public class Config {
     @ConfigSpec(min = 1, max = 1000)
     public int maxApplicableSlots = 4;
 
-    @ConfigSpec(min = 1, max = Integer.MAX_VALUE, impactsCache = true)
-    public int maxApplicableItems = 100;
-
     @ConfigSpec
     public boolean useTextForBooleans = false;
 
