@@ -11,7 +11,7 @@ body:
       options:
         - label: "I have searched the existing issues and this is not a duplicate."
           required: true
-        - label: "I believe this feature fits the **core vision of the TarotCards mod**."
+        - label: "I believe this feature fits the **core vision of the UEI mod**."
           required: true
 
   - type: dropdown
@@ -20,8 +20,8 @@ body:
       label: "Feature Type"
       description: "What kind of suggestion is this?"
       options:
-        - New Tarot Card / Effect
-        - Gameplay Mechanic
+        - UI / Layout Improvement
+        - Viewer Integration (EMI/REI/JEI)
         - Compatibility (with other mods)
         - Performance / Optimization
         - Documentation / Localization
@@ -34,7 +34,7 @@ body:
     attributes:
       label: "Feature Summary"
       description: "What is your idea?"
-      placeholder: "e.g., Add a 'Reversed' variant for each Tarot card with negative effects."
+      placeholder: "e.g., Add a toggle button to sort the applicable items alphabetically."
     validations:
       required: true
 
@@ -43,7 +43,7 @@ body:
     attributes:
       label: "The 'Why'"
       description: "How does this improve the gameplay or experience?"
-      placeholder: "This would add more risk/reward depth to the card-drawing mechanic..."
+      placeholder: "This would make it much easier to find specific items when playing with large modpacks..."
     validations:
       required: true
 
@@ -52,7 +52,7 @@ body:
     attributes:
       label: "Implementation Details (Optional)"
       description: "How do you imagine this working in-game?"
-      placeholder: "The cards could have a 10% chance to be flipped when drawn, changing the NBT data..."
+      placeholder: "There could be a small sort icon next to the scrollbar that updates the UI..."
 
   - type: textarea
     id: alternatives

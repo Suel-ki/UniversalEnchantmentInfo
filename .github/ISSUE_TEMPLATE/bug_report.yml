@@ -30,7 +30,7 @@ body:
     id: version
     attributes:
       label: "Versions"
-      placeholder: "e.g., Minecraft 1.21.1, Mod v1.0.2"
+      placeholder: "e.g., Minecraft 1.21.1, Mod v1.0.2, EMI v1.1.15"
     validations:
       required: true
 
@@ -49,10 +49,10 @@ body:
       label: "Steps to Reproduce"
       description: "How do we make this happen again?"
       placeholder: |
-        1. Open the game
-        2. Equip the Tarot Deck
-        3. Press [Key]
-        4. See error...
+        1. Open the game with JEI/REI/EMI installed
+        2. Press 'R' on an Enchanted Book
+        3. Scroll down the applicable items list
+        4. See error/visual glitch...
     validations:
       required: true
 
