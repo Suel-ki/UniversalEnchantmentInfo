@@ -71,7 +71,7 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
                 .setStandardSlotBackground();
 
         for (List<ItemStack> batch : EnchantmentScrollContent.batchApplicableItems(recipe)) {
-            builder.addSlot(RecipeIngredientRole.RENDER_ONLY)
+            builder.addSlot(RecipeIngredientRole.INPUT)
                     .addItemStacks(batch)
                     .setStandardSlotBackground()
                     .setSlotName("applicable_slots");
