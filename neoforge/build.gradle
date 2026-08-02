@@ -17,7 +17,7 @@ loom {
 }
 
 base {
-    archivesName = "UniversalEnchantmentInfo" + "-" + minecraft_version + "-neoforge"
+    archivesName = archives_base_name + "-" + minecraft_version + "-neoforge"
 }
 
 configurations {
