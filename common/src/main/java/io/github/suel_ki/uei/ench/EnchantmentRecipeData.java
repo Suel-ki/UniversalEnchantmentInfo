@@ -68,24 +68,23 @@ public record EnchantmentRecipeData(
         return enchantmentProperties.rarity();
     }
 
-    public static EnchantmentRecipeData create(Holder<Enchantment> holder, List<Holder<Item>> applicableItems, List<ItemStack> exclusiveStacks) {
+    public static EnchantmentRecipeData create(Holder<Enchantment> holder, List<Holder<Item>> applicableItems,
+                                               List<ItemStack> exclusiveStacks, ItemStack maxLevelBook) {
         EnchantmentProperties props = EnchantmentProperties.of(holder);
 
         String modId = props.modid();
         Component modName = Component.literal(PlatformHelper.getModName(modId)).withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE);
 
-        ItemStack book = createEnchantedBook(holder, props.maxLevel());
-
         List<ItemStack> allLevels = new ArrayList<>(props.maxLevel());
         for (int lvl = 1; lvl < props.maxLevel(); lvl++) {
             allLevels.add(createEnchantedBook(holder, lvl));
         }
-        allLevels.add(book);
+        allLevels.add(maxLevelBook);
 
         MutableComponent name = Component.translatable(props.descriptionId())
                 .withStyle(props.curse() ? ChatFormatting.RED : ChatFormatting.WHITE);
         return new EnchantmentRecipeData(
-                holder, props, book, allLevels, name, modName,
+                holder, props, maxLevelBook, allLevels, name, modName,
                 exclusiveStacks, applicableItems
         );
     }
