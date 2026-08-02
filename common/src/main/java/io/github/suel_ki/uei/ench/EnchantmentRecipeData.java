@@ -7,6 +7,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +33,12 @@ public record EnchantmentRecipeData(
     private static final int MAX_DESC_WIDTH = 144;
 
     public List<FormattedCharSequence> descriptionLines(Font font) {
-        String descKey = enchantmentProperties.descriptionId() + ".desc";
+        String key = enchantmentProperties.descriptionId();
+        if (this.enchantment.value().description().getContents() instanceof TranslatableContents translatable) {
+            key = translatable.getKey();
+        }
+
+        String descKey = key + ".desc";
         Component description;
 
         if (I18n.exists(descKey)) {
@@ -81,7 +87,7 @@ public record EnchantmentRecipeData(
         }
         allLevels.add(maxLevelBook);
 
-        MutableComponent name = Component.translatable(props.descriptionId())
+        MutableComponent name = holder.value().description().copy()
                 .withStyle(props.curse() ? ChatFormatting.RED : ChatFormatting.WHITE);
         return new EnchantmentRecipeData(
                 holder, props, maxLevelBook, allLevels, name, modName,
