@@ -12,5 +12,5 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     compileOnly project(path: ":common")
 
-    compileOnlyApi "curse.maven:emi-1544558:${emi_neoforge}"
+    compileOnlyApi "curse.maven:emi-unofficial-port-unstable-1544558:${emi_neoforge}"
 }

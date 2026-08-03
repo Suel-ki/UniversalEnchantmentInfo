@@ -79,13 +79,13 @@ subprojects {
 //                if (recipe_viewer == "emi") {
 //                    modRuntimeOnly "dev.emi:emi-${project.name}:${emi_version}"
 //                }
-                compileOnlyApi "curse.maven:emi-1544558:${emi_neoforge}"
+                compileOnlyApi "curse.maven:emi-unofficial-port-unstable-1544558:${emi_neoforge}"
                 if (recipe_viewer == "emi") {
                      if (project.name == "neoforge") {
-                         runtimeOnly "curse.maven:emi-1544558:${emi_neoforge}"
+                         runtimeOnly "curse.maven:emi-unofficial-port-unstable-1544558:${emi_neoforge}"
                      }
                      if (project.name == "fabric") {
-                         runtimeOnly "curse.maven:emi-1544558:${emi_fabric}"
+                         runtimeOnly "curse.maven:emi-unofficial-port-unstable-1544558:${emi_fabric}"
                      }
                 }
             }
