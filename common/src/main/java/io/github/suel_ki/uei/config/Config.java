@@ -59,6 +59,9 @@ public class Config {
     @RequiresMod("apotheosis")
     public boolean apotheosisCompat = true;
 
+    @ConfigSpec(impactsCache = true)
+    public boolean lookupEnchantmentsByItem = true;
+
     @ConfigSpec
     public boolean useTextForBooleans = false;
 

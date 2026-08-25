@@ -39,10 +39,16 @@ public class EnchantmentDisplay implements Display {
                 .flatMap(List::stream)
                 .toList();
 
-        this.inputs = List.of(
-                EntryIngredients.ofItemStacks(exclusiveStacks),
-                EntryIngredients.ofItemStacks(applicableStacks)
-        );
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks),
+                    EntryIngredients.ofItemStacks(applicableStacks)
+            );
+        } else {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks)
+            );
+        }
         this.outputs = List.of(bookIngredient);
     }
 

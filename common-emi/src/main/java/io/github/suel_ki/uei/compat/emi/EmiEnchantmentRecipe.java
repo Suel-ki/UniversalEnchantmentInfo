@@ -40,11 +40,14 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
                 .map(list -> EmiIngredient.of(list.stream().map(EmiStack::of).toList()))
                 .toList();
 
-        this.inputs = Stream.concat(
-                exclusiveEmiIngredients.stream(),
-                applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
-        ).toList();
-
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = Stream.concat(
+                    exclusiveEmiIngredients.stream(),
+                    applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
+            ).toList();
+        } else {
+            this.inputs = exclusiveEmiIngredients;
+        }
         this.outputs = recipe.allLevelBooks().stream().map(EmiStack::of).toList();
 
         Map<ItemStack, EmiStack> stackToEmi = new IdentityHashMap<>();
