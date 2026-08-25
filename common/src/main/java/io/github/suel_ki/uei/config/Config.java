@@ -20,7 +20,18 @@ public class Config {
             .setExclusionStrategies(new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes f) {
-                    return f.getAnnotation(ConfigSpec.class) == null;
+                    if (f.getAnnotation(ConfigSpec.class) == null) {
+                        return true;
+                    }
+
+                    RequiresMod requiresMod = f.getAnnotation(RequiresMod.class);
+                    if (requiresMod != null) {
+                        if (!PlatformHelper.isModLoaded(requiresMod.value())) {
+                            return true;
+                        }
+                    }
+
+                    return false;
                 }
                 @Override
                 public boolean shouldSkipClass(Class<?> clazz) {
@@ -43,6 +54,10 @@ public class Config {
 
     @ConfigSpec(min = 1, max = 1000)
     public int maxApplicableSlots = 4;
+
+    @ConfigSpec(impactsCache = true)
+    @RequiresMod("apotheosis")
+    public boolean apotheosisCompat = true;
 
     @ConfigSpec
     public boolean useTextForBooleans = false;

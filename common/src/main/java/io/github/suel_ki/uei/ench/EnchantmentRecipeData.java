@@ -22,7 +22,7 @@ public record EnchantmentRecipeData(
         List<ItemStack> allLevelBooks,
         Component localizedName,
         Component modName,
-        List<ItemStack> exclusiveStacks,
+        List<List<ItemStack>> exclusiveStacks,
         List<ItemStack> applicableStacks
 ) {
 
@@ -78,7 +78,7 @@ public record EnchantmentRecipeData(
     }
 
     public static EnchantmentRecipeData create(Enchantment enchantment, List<ItemStack> applicableStacks,
-                                               List<ItemStack> exclusiveStacks, ItemStack maxLevelBook) {
+                                               List<List<ItemStack>> exclusiveStacks, ItemStack maxLevelBook) {
         EnchantmentProperties props = EnchantmentProperties.of(enchantment);
 
         String modId = props.modid();

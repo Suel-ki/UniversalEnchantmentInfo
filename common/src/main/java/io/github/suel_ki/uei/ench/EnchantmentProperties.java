@@ -1,5 +1,6 @@
 package io.github.suel_ki.uei.ench;
 
+import io.github.suel_ki.uei.compat.ApotheosisCompat;
 import io.github.suel_ki.uei.config.Config;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -32,7 +33,7 @@ public record EnchantmentProperties(
 
         return new EnchantmentProperties(
                 enchantment.getDescriptionId(),
-                enchantment.getMaxLevel(),
+                ApotheosisCompat.getRealMaxLevel(enchantment),
                 enchantment.isCurse(),
                 enchantment.isTreasureOnly(),
                 enchantment.isTradeable(),

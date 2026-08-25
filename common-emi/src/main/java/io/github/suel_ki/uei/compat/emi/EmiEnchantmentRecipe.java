@@ -10,6 +10,7 @@ import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.compat.emi.widget.EmiEnchantmentScrollWidget;
 import io.github.suel_ki.uei.compat.emi.widget.ScrollSlotWidget;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +28,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
     private final List<EmiIngredient> inputs;
     private final List<EmiStack> outputs;
     private final List<EmiIngredient> applicableSlotIngredients;
-    private final List<EmiStack> exclusiveEmiStacks;
+    private final List<EmiIngredient> exclusiveEmiIngredients;
 
     public EmiEnchantmentRecipe(ResourceLocation id, EnchantmentRecipeData recipe) {
         this.recipe = recipe;
@@ -35,11 +36,15 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
 
         List<ItemStack> applicableItems = recipe.applicableStacks();
         List<EmiStack> applicableEmiStacks = applicableItems.stream().map(EmiStack::of).toList();
-        this.exclusiveEmiStacks = recipe.exclusiveStacks().stream().map(EmiStack::of).toList();
+        this.exclusiveEmiIngredients = recipe.exclusiveStacks().stream()
+                .map(list -> EmiIngredient.of(list.stream().map(EmiStack::of).toList()))
+                .toList();
 
         this.inputs = Stream.concat(
-                exclusiveEmiStacks.stream().<EmiIngredient>map(s -> s),
-                applicableEmiStacks.stream().<EmiIngredient>map(s -> s)).toList();
+                exclusiveEmiIngredients.stream(),
+                applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
+        ).toList();
+
         this.outputs = recipe.allLevelBooks().stream().map(EmiStack::of).toList();
 
         Map<ItemStack, EmiStack> stackToEmi = new IdentityHashMap<>();
@@ -135,7 +140,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
             for (int i = 0; i < exclusiveCount; i++) {
                 int col = i % exclusiveSlotsPerRow;
                 int row = i / exclusiveSlotsPerRow;
-                EmiIngredient ingredient = exclusiveEmiStacks.get(i);
+                EmiIngredient ingredient = exclusiveEmiIngredients.get(i);
                 int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
                 int sy = lowerY + ciy + row * spacing;
 
