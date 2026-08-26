@@ -21,6 +21,8 @@
   "uei.config.text_scroll_speed_multiplier": "Text Scroll Speed",
   "uei.config.max_applicable_slots": "Applicable Item Slots",
   "uei.config.max_applicable_items": "Applicable Item Limit",
+  "uei.config.apothic_compat": "Apothic Enchanting Compat",
+  "uei.config.lookup_enchantments_by_item": "Lookup Enchantments By Item",
   "uei.config.use_text_for_booleans": "Text Boolean Display",
   "uei.config.show_rarity": "Show Rarity",
   "uei.config.show_max_level": "Show Max Level",

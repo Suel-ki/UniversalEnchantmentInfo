@@ -84,7 +84,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
 
             // exclusive header
             int chy = EnchantmentScrollContent.exclusiveHeaderStartY(aiy, applicableRows());
-            List<ItemStack> exclusiveBooks = recipe.exclusiveStacks();
+            List<List<ItemStack>> exclusiveBooks = recipe.exclusiveStacks();
             if (!exclusiveBooks.isEmpty()) {
                 EnchantmentScrollContent.drawExclusiveHeader(g, font,
                         left + pad, chy, contentRight,

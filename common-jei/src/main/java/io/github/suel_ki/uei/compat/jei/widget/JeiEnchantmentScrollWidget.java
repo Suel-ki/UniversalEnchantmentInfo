@@ -28,7 +28,7 @@ import java.util.Optional;
 public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInputHandler {
     private final EnchantmentRecipeData recipe;
     private final List<FormattedCharSequence> descLines;
-    private final List<ItemStack> exclusiveBooks;
+    private final List<List<ItemStack>> exclusiveBooks;
     private final List<IRecipeSlotDrawable> exclusiveSlots;
     private final List<IRecipeSlotDrawable> applicableSlots;
     private final int exclusiveSlotsPerRow;

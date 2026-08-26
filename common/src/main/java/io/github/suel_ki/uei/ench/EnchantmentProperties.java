@@ -1,5 +1,6 @@
 package io.github.suel_ki.uei.ench;
 
+import io.github.suel_ki.uei.compat.ApothicCompat;
 import io.github.suel_ki.uei.config.Config;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -33,7 +34,7 @@ public record EnchantmentProperties(
 
         return new EnchantmentProperties(
                 descId,
-                enchantment.getMaxLevel(),
+                ApothicCompat.getRealMaxLevel(enchantment),
                 holder.is(EnchantmentTags.CURSE),
                 holder.is(EnchantmentTags.TREASURE),
                 holder.is(EnchantmentTags.TRADEABLE),
