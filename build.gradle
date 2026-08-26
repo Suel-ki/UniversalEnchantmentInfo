@@ -89,13 +89,9 @@ subprojects {
             }
 
             if (emi_available) {
-//                modCompileOnlyApi "dev.emi:emi-${project.name}:${emi_version}"
-//                if (recipe_viewer == "emi") {
-//                    modRuntimeOnly "dev.emi:emi-${project.name}:${emi_version}"
-//                }
-                modCompileOnlyApi "maven.modrinth:emi:${emi_version}+${project.name}"
+                modCompileOnlyApi "dev.emi:emi-${project.name}:${emi_version}"
                 if (recipe_viewer == "emi") {
-                    modRuntimeOnly "maven.modrinth:emi:${emi_version}+${project.name}"
+                    modRuntimeOnly "dev.emi:emi-${project.name}:${emi_version}"
                 }
             }
             if (jei_available && recipe_viewer == "jei") {
@@ -133,8 +129,12 @@ allprojects {
             url = "https://maven.blamejared.com/"
         }
         maven {
-            name = "Gnomecraft Maven"
-            url = "https://maven.gnomecraft.net/releases/"
+            name = "EMI Maven"
+            url = "https://repo.sleeping.town/"
+        }
+        maven {
+            name = "ModMenu Maven"
+            url = "https://maven.terraformersmc.com/"
         }
         maven {
             name = "Shedaniel Maven"
