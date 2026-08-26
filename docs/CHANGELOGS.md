@@ -15,3 +15,13 @@ Version [26.1.2-1.2.0] - 2026-08-03
 - Support custom enchantment translation keys
 
 
+
+Version [26.1.2-1.3.0] - 2026-08-26
+
+### Features
+
+- LookupEnchantmentsByItem config
+
+- Apothic Enchanting compat
+
+
