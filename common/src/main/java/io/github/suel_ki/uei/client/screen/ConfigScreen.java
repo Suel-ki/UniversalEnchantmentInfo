@@ -1,8 +1,10 @@
 package io.github.suel_ki.uei.client.screen;
 
+import io.github.suel_ki.uei.PlatformHelper;
 import io.github.suel_ki.uei.Uei;
 import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.config.ConfigSpec;
+import io.github.suel_ki.uei.config.RequiresMod;
 import io.github.suel_ki.uei.ench.EnchantmentDataFactory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -45,6 +47,12 @@ public class ConfigScreen extends Screen {
             Config def = new Config();
             for (Field f : Config.class.getDeclaredFields()) {
                 if (Modifier.isStatic(f.getModifiers()) || f.getAnnotation(ConfigSpec.class) == null) continue;
+
+                RequiresMod requiresMod = f.getAnnotation(RequiresMod.class);
+                if (requiresMod != null && !PlatformHelper.isModLoaded(requiresMod.value())) {
+                    continue;
+                }
+
                 f.setAccessible(true);
                 this.entries.add(new ConfigList.Entry(f, cfg, def, this.font, this::updateButtonValidity));
             }

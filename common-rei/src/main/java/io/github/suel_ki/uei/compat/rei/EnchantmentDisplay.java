@@ -21,10 +21,10 @@ public class EnchantmentDisplay implements Display {
 
     public EnchantmentDisplay(EnchantmentRecipeData recipe) {
         this.recipe = recipe;
-        this.bookIngredient = EntryIngredients.of(recipe.enchantedBook());
+        this.bookIngredient = EntryIngredients.ofItemStacks(recipe.allLevelBooks());
 
         this.exclusiveIngredients = recipe.exclusiveStacks().stream()
-                .map(EntryIngredients::of)
+                .map(EntryIngredients::ofItemStacks)
                 .toList();
 
         List<List<ItemStack>> batches = EnchantmentScrollContent.batchApplicableItems(recipe);
@@ -36,10 +36,15 @@ public class EnchantmentDisplay implements Display {
                 .map(holder -> new ItemStack(holder.value()))
                 .toList();
 
+        List<ItemStack> exclusiveStacks = recipe.exclusiveStacks().stream()
+                .flatMap(List::stream)
+                .toList();
+
         this.inputs = List.of(
-                EntryIngredients.ofItemStacks(recipe.exclusiveStacks()),
+                EntryIngredients.ofItemStacks(exclusiveStacks),
                 EntryIngredients.ofItemStacks(allApplicableStacks)
         );
+
         this.outputs = List.of(EntryIngredients.ofItemStacks(recipe.allLevelBooks()));
     }
 

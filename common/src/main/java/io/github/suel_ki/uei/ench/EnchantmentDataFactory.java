@@ -1,5 +1,6 @@
 package io.github.suel_ki.uei.ench;
 
+import io.github.suel_ki.uei.compat.ApothicCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -11,10 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EnchantmentDataFactory {
 
@@ -35,34 +33,44 @@ public class EnchantmentDataFactory {
 
         List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.holders().toList();
 
-        Map<Holder<Enchantment>, ItemStack> maxLevelBookCache = new HashMap<>(allEnchantments.size());
+        Map<Enchantment, List<ItemStack>> allLevelBooksCache = new HashMap<>(allEnchantments.size());
         for (Holder.Reference<Enchantment> e : allEnchantments) {
-            maxLevelBookCache.put(e, EnchantedBookItem.createForEnchantment(new EnchantmentInstance(e, e.value().getMaxLevel())));
+            int maxLvl = ApothicCompat.getRealMaxLevel(e.value());
+            List<ItemStack> books = new ArrayList<>(maxLvl);
+            for (int lvl = 1; lvl <= maxLvl; lvl++) {
+                books.add(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(e, lvl)));
+            }
+            allLevelBooksCache.put(e.value(), books);
         }
 
         List<EnchantmentRecipeData> recipes = new ArrayList<>(allEnchantments.size());
 
         for (Holder.Reference<Enchantment> targetEnchantment : allEnchantments) {
+            if (!targetEnchantment.isBound()) continue;
             Enchantment enchantment = targetEnchantment.value();
 
-            List<Holder<Item>> applicableList = enchantment.getSupportedItems().stream()
-                    .toList();
+            List<Holder<Item>> applicableList = enchantment.getSupportedItems().stream().toList();
 
-            List<ItemStack> exclusiveBooks = new ArrayList<>();
+            List<List<ItemStack>> exclusiveBooks = new ArrayList<>();
             for (Holder<Enchantment> otherEnchantment : enchantment.exclusiveSet()) {
-                if (otherEnchantment != targetEnchantment) {
-                    ItemStack book = maxLevelBookCache.get(otherEnchantment);
-                    if (book != null) {
-                        exclusiveBooks.add(book);
+                if (!otherEnchantment.isBound()) continue;
+
+                if (!otherEnchantment.is(targetEnchantment.key())) {
+                    List<ItemStack> books = allLevelBooksCache.get(otherEnchantment.value());
+                    if (books != null) {
+                        exclusiveBooks.add(books);
                     }
                 }
             }
+
+            List<ItemStack> targetBooks = allLevelBooksCache.get(enchantment);
+            ItemStack maxLevelBook = targetBooks.getLast();
 
             recipes.add(EnchantmentRecipeData.create(
                     targetEnchantment,
                     applicableList,
                     exclusiveBooks,
-                    maxLevelBookCache.get(targetEnchantment)
+                    maxLevelBook
             ));
         }
 

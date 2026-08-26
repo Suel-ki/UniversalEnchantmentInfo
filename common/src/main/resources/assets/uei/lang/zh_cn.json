@@ -20,6 +20,8 @@
   "uei.config.scroll_speed": "滚动速度",
   "uei.config.text_scroll_speed_multiplier": "文字滚动速度",
   "uei.config.max_applicable_slots": "适用物品槽位上限",
+  "uei.config.apothic_compat": "神化附魔兼容",
+  "uei.config.lookup_enchantments_by_item": "按物品反查附魔",
   "uei.config.use_text_for_booleans": "文字布尔值显示",
   "uei.config.show_rarity": "显示稀有度",
   "uei.config.show_max_level": "显示最高等级",

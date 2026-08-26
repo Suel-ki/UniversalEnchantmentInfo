@@ -29,6 +29,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
     private final List<EmiStack> outputs;
 
     private final List<EmiIngredient> applicableSlotIngredients;
+    private final List<EmiIngredient> exclusiveEmiIngredients;
 
     public EmiEnchantmentRecipe(ResourceLocation id, EnchantmentRecipeData recipe) {
         this.recipe = recipe;
@@ -39,10 +40,12 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
                 .map(holder -> EmiStack.of(holder.value()))
                 .toList();
 
-        List<EmiStack> exclusiveEmiStacks = recipe.exclusiveStacks().stream().map(EmiStack::of).toList();
+        this.exclusiveEmiIngredients = recipe.exclusiveStacks().stream()
+                .map(list -> EmiIngredient.of(list.stream().map(EmiStack::of).toList()))
+                .toList();
 
         this.inputs = Stream.concat(
-                exclusiveEmiStacks.stream().<EmiIngredient>map(s -> s),
+                exclusiveEmiIngredients.stream(),
                 applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
         ).toList();
 
@@ -101,7 +104,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
         widgets.addText(recipe.modName().copy(),
                 EnchantmentUIRenderer.MOD_NAME_X, EnchantmentUIRenderer.MOD_NAME_Y, -1, false);
 
-        widgets.addSlot(EmiStack.of(recipe.enchantedBook()),
+        widgets.addSlot(EmiIngredient.of(this.outputs),
                         EnchantmentUIRenderer.SLOT_X, EnchantmentUIRenderer.SLOT_Y)
                 .recipeContext(this);
 
@@ -143,11 +146,10 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
             for (int i = 0; i < exclusiveCount; i++) {
                 int col = i % exclusiveSlotsPerRow;
                 int row = i / exclusiveSlotsPerRow;
-                EmiIngredient ingredient = EmiStack.of(recipe.exclusiveStacks().get(i));
                 int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
                 int sy = lowerY + ciy + row * spacing;
 
-                widgets.add(new ScrollSlotWidget(ingredient, sx, sy,
+                widgets.add(new ScrollSlotWidget(exclusiveEmiIngredients.get(i), sx, sy,
                         scrollWidget.scrollAmountSupplier(), scrollArea));
             }
         }
