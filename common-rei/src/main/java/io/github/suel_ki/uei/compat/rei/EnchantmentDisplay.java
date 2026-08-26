@@ -1,6 +1,7 @@
 package io.github.suel_ki.uei.compat.rei;
 
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -40,11 +41,16 @@ public class EnchantmentDisplay implements Display {
                 .flatMap(List::stream)
                 .toList();
 
-        this.inputs = List.of(
-                EntryIngredients.ofItemStacks(exclusiveStacks),
-                EntryIngredients.ofItemStacks(allApplicableStacks)
-        );
-
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks),
+                    EntryIngredients.ofItemStacks(allApplicableStacks)
+            );
+        } else {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks)
+            );
+        }
         this.outputs = List.of(EntryIngredients.ofItemStacks(recipe.allLevelBooks()));
     }
 
