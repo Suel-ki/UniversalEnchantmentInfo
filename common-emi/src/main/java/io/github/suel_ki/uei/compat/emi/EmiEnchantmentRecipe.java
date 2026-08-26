@@ -10,6 +10,7 @@ import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.compat.emi.widget.EmiEnchantmentScrollWidget;
 import io.github.suel_ki.uei.compat.emi.widget.ScrollSlotWidget;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -43,10 +44,14 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
                 .map(list -> EmiIngredient.of(list.stream().map(EmiStack::of).toList()))
                 .toList();
 
-        this.inputs = Stream.concat(
-                exclusiveEmiIngredients.stream(),
-                applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
-        ).toList();
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = Stream.concat(
+                    exclusiveEmiIngredients.stream(),
+                    applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
+            ).toList();
+        } else {
+            this.inputs = exclusiveEmiIngredients;
+        }
 
         this.outputs = recipe.allLevelBooks().stream().map(EmiStack::of).toList();
 

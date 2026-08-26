@@ -4,6 +4,7 @@ import io.github.suel_ki.uei.Uei;
 import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.compat.jei.widget.JeiEnchantmentScrollWidget;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -71,10 +72,17 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
                 .setStandardSlotBackground();
 
         for (List<ItemStack> batch : EnchantmentScrollContent.batchApplicableItems(recipe)) {
-            builder.addInputSlot()
-                    .addItemStacks(batch)
-                    .setStandardSlotBackground()
-                    .setSlotName("applicable_slots");
+            if (Config.get().lookupEnchantmentsByItem) {
+                builder.addInputSlot()
+                        .addItemStacks(batch)
+                        .setStandardSlotBackground()
+                        .setSlotName("applicable_slots");
+            } else {
+                builder.addSlot(RecipeIngredientRole.RENDER_ONLY)
+                        .addItemStacks(batch)
+                        .setStandardSlotBackground()
+                        .setSlotName("applicable_slots");
+            }
         }
 
         for (List<ItemStack> exclusiveBooks : recipe.exclusiveStacks()) {

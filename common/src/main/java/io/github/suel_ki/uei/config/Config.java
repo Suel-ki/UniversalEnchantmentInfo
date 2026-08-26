@@ -59,6 +59,9 @@ public class Config {
     @RequiresMod("apothic_enchanting")
     public boolean apothicCompat = true;
 
+    @ConfigSpec(impactsCache = true)
+    public boolean lookupEnchantmentsByItem = true;
+
     @ConfigSpec
     public boolean useTextForBooleans = false;
 
