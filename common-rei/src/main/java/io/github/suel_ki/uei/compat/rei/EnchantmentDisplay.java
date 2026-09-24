@@ -2,6 +2,7 @@ package io.github.suel_ki.uei.compat.rei;
 
 import io.github.suel_ki.uei.Uei;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -26,10 +27,11 @@ public class EnchantmentDisplay implements Display {
 
     public EnchantmentDisplay(EnchantmentRecipeData recipe) {
         this.recipe = recipe;
-        this.bookIngredient = EntryIngredients.of(recipe.enchantedBook());
+        this.bookIngredient = EntryIngredients.ofItemStacks(recipe.allLevelBooks());
 
-        this.exclusiveIngredients = recipe.exclusiveStacks().stream()
-                .map(EntryIngredients::of)
+        this.exclusiveIngredients = recipe
+                .exclusiveStacks().stream()
+                .map(EntryIngredients::ofItemStacks)
                 .toList();
 
         List<List<ItemStack>> batches = EnchantmentScrollContent.batchApplicableItems(recipe);
@@ -37,15 +39,25 @@ public class EnchantmentDisplay implements Display {
                 .map(EntryIngredients::ofItemStacks)
                 .toList();
 
-        List<ItemStack> allApplicableStacks = recipe.applicableItems().stream()
+        List<ItemStack> applicableStacks = recipe.applicableItems().stream()
                 .map(holder -> new ItemStack(holder.value()))
                 .toList();
 
-        this.inputs = List.of(
-                EntryIngredients.ofItemStacks(recipe.exclusiveStacks()),
-                EntryIngredients.ofItemStacks(allApplicableStacks)
-        );
-        this.outputs = List.of(EntryIngredients.ofItemStacks(recipe.allLevelBooks()));
+        List<ItemStack> exclusiveStacks = recipe.exclusiveStacks().stream()
+                .flatMap(List::stream)
+                .toList();
+
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks),
+                    EntryIngredients.ofItemStacks(applicableStacks)
+            );
+        } else {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks)
+            );
+        }
+        this.outputs = List.of(bookIngredient);
         this.id = recipe.enchantment().unwrapKey()
                 .map(key -> {
                     Identifier enchId = key.identifier();

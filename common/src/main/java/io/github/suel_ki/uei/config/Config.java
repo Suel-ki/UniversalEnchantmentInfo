@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Config {
 
@@ -20,7 +21,18 @@ public class Config {
             .setExclusionStrategies(new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes f) {
-                    return f.getAnnotation(ConfigSpec.class) == null;
+                    if (f.getAnnotation(ConfigSpec.class) == null) {
+                        return true;
+                    }
+
+                    RequiresMod requiresMod = f.getAnnotation(RequiresMod.class);
+                    if (requiresMod != null) {
+                        if (!PlatformHelper.isModLoaded(requiresMod.value())) {
+                            return true;
+                        }
+                    }
+
+                    return false;
                 }
                 @Override
                 public boolean shouldSkipClass(Class<?> clazz) {
@@ -43,6 +55,9 @@ public class Config {
 
     @ConfigSpec(min = 1, max = 1000)
     public int maxApplicableSlots = 4;
+
+    @ConfigSpec(impactsCache = true)
+    public boolean lookupEnchantmentsByItem = true;
 
     @ConfigSpec
     public boolean useTextForBooleans = false;
@@ -79,6 +94,20 @@ public class Config {
 
     @ConfigSpec(min = 0, max = 16777215, isColor = true)
     public int rarityColorEpic = 16733695;
+
+    public enum Section {
+        DESCRIPTION, INFO_LINES, APPLIES_TO, EXCLUSIVES
+    }
+
+    public enum InfoField {
+        RARITY, MAX_LEVEL, TREASURE, TRADEABLE, CURSE, DISCOVERABLE, ENCHANTING_TABLE
+    }
+
+    @ConfigSpec
+    public List<Section> sectionOrder = List.of(Section.DESCRIPTION, Section.INFO_LINES, Section.APPLIES_TO, Section.EXCLUSIVES);
+
+    @ConfigSpec
+    public List<InfoField> infoOrder = List.of(InfoField.RARITY, InfoField.MAX_LEVEL, InfoField.TREASURE, InfoField.TRADEABLE, InfoField.CURSE, InfoField.DISCOVERABLE, InfoField.ENCHANTING_TABLE);
 
     public static Config get() {
         return INSTANCE;

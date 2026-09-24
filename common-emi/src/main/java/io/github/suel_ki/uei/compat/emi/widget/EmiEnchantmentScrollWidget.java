@@ -27,6 +27,8 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
 
     private final ScrollContext scrollContext;
 
+    private EnchantmentScrollContent.LayoutMetrics layoutMetrics;
+
     public EmiEnchantmentScrollWidget(EnchantmentRecipeData recipe, int x, int y, int width, int height,
                                       int applicableSlotCount, int applicableSlotsPerRow) {
         this.recipe = recipe;
@@ -35,7 +37,21 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
         this.applicableSlotsPerRow = applicableSlotsPerRow;
         this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(width, EnchantmentScrollContent.TRACK_WIDTH);
         this.descLines = recipe.descriptionLines(Minecraft.getInstance().font);
+
+        updateLayoutMetrics();
         this.scrollContext = new ScrollContext(x, y, width, height, this::maxScroll);
+    }
+
+    private void updateLayoutMetrics() {
+        int excRows = recipe.exclusiveStacks().isEmpty() ? 0 :
+                EnchantmentScrollContent.calculateRows(recipe.exclusiveStacks().size(), exclusiveSlotsPerRow);
+        this.layoutMetrics = new EnchantmentScrollContent.LayoutMetrics(
+                this.recipe, Minecraft.getInstance().font, applicableRows(), excRows
+        );
+    }
+
+    public EnchantmentScrollContent.LayoutMetrics getLayoutMetrics() {
+        return this.layoutMetrics;
     }
 
     @Override
@@ -48,8 +64,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     }
 
     private int maxScroll() {
-        return EnchantmentScrollContent.maxScroll(
-                recipe, applicableRows(), recipe.exclusiveStacks().size(), exclusiveSlotsPerRow, bounds.height());
+        return Math.max(layoutMetrics.contentHeight - bounds.height(), 0);
     }
 
     private float getScrollAmount() {
@@ -72,27 +87,41 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
         int top = bounds.y();
 
         try (var ignored = ScissorHelper.scissor(g, bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height())) {
-
             g.pose().pushMatrix();
             g.pose().translate(0, -Math.round(scrollAmount));
 
-            EnchantmentScrollContent.drawDescription(g, font, descLines, left, top, pad);
-
             int contentRight = scrollContext.contentRight();
-            int aiy = EnchantmentScrollContent.drawInfoLines(g, font, recipe, descLines, left, top, pad,
-                    contentRight - pad, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
 
-            // exclusive header
-            int chy = EnchantmentScrollContent.exclusiveHeaderStartY(aiy, applicableRows());
-            List<ItemStack> exclusiveBooks = recipe.exclusiveStacks();
-            if (!exclusiveBooks.isEmpty()) {
-                EnchantmentScrollContent.drawExclusiveHeader(g, font,
-                        left + pad, chy, contentRight,
-                        EnchantmentScrollContent.EXCLUSIVE_HEADER, exclusiveBooks.size(), EnchantmentScrollContent.UNIVERSAL_SCISSOR);
-            } else {
-                EnchantmentScrollContent.renderScrollingString(g, font,
-                        EnchantmentScrollContent.NO_EXCLUSIVES,
-                        left + pad, chy, contentRight, chy + font.lineHeight, -1, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+            if (layoutMetrics.descY != -1) {
+                EnchantmentScrollContent.drawDescription(g, font, descLines, left, top + layoutMetrics.descY, pad);
+            }
+
+            if (layoutMetrics.infoY != -1) {
+                EnchantmentScrollContent.drawAttributes(g, font, recipe, left + pad, top + layoutMetrics.infoY,
+                        contentRight - pad, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+            }
+
+            if (layoutMetrics.appliesToY != -1) {
+                EnchantmentScrollContent.renderScrollingString(g, font, EnchantmentScrollContent.APPLIES_TO,
+                        left + pad, top + layoutMetrics.appliesToY, contentRight,
+                        top + layoutMetrics.appliesToY + font.lineHeight, -1,
+                        EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+            }
+
+            if (layoutMetrics.exclusivesY != -1) {
+                int chy = top + layoutMetrics.exclusivesY;
+                List<List<ItemStack>> exclusiveBooks = recipe.exclusiveStacks();
+                if (!exclusiveBooks.isEmpty()) {
+                    EnchantmentScrollContent.drawExclusiveHeader(g, font,
+                            left + pad, chy, contentRight,
+                            EnchantmentScrollContent.EXCLUSIVE_HEADER, exclusiveBooks.size(),
+                            EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+                } else {
+                    EnchantmentScrollContent.renderScrollingString(g, font,
+                            EnchantmentScrollContent.NO_EXCLUSIVES,
+                            left + pad, chy, contentRight, chy + font.lineHeight, -1,
+                            EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+                }
             }
 
             g.pose().popMatrix();
@@ -117,5 +146,10 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     @Override
     public boolean onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         return scrollContext.mouseDragged(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void onMouseReleased(double mouseX, double mouseY, int button) {
+        scrollContext.resetDrag();
     }
 }

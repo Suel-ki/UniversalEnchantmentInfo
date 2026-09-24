@@ -10,6 +10,7 @@ import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.compat.emi.widget.EmiEnchantmentScrollWidget;
 import io.github.suel_ki.uei.compat.emi.widget.ScrollSlotWidget;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -28,6 +29,7 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
     private final List<EmiIngredient> inputs;
     private final List<EmiStack> outputs;
     private final List<EmiIngredient> applicableSlotIngredients;
+    private final List<EmiIngredient> exclusiveEmiIngredients;
 
     public EmiEnchantmentRecipe(Identifier id, EnchantmentRecipeData recipe) {
         this.recipe = recipe;
@@ -37,12 +39,18 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
                 .map(holder -> EmiStack.of(holder.value()))
                 .toList();
 
-        List<EmiStack> exclusiveEmiStacks = recipe.exclusiveStacks().stream().map(EmiStack::of).toList();
+        this.exclusiveEmiIngredients = recipe.exclusiveStacks().stream()
+                .map(list -> EmiIngredient.of(list.stream().map(EmiStack::of).toList()))
+                .toList();
 
-        this.inputs = Stream.concat(
-                exclusiveEmiStacks.stream().<EmiIngredient>map(s -> s),
-                applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
-        ).toList();
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = Stream.concat(
+                    exclusiveEmiIngredients.stream(),
+                    applicableEmiStacks.stream().<EmiIngredient>map(s -> s)
+            ).toList();
+        } else {
+            this.inputs = exclusiveEmiIngredients;
+        }
 
         this.outputs = recipe.allLevelBooks().stream().map(EmiStack::of).toList();
 
@@ -119,34 +127,37 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
 
         widgets.add(scrollWidget);
 
-        int aiy = EnchantmentScrollContent.applicableItemStartY(recipe);
+        EnchantmentScrollContent.LayoutMetrics metrics = scrollWidget.getLayoutMetrics();
 
-        for (int i = 0; i < batchCount; i++) {
-            int col = i % slotsPerRow;
-            int row = i / slotsPerRow;
-            int sx = lowerX + EnchantmentUIRenderer.PADDING + col * aspacing;
-            int sy = lowerY + aiy + row * aspacing;
+        int aiy = metrics.getAppliesToSlotsY();
+        if (aiy != -1) {
+            for (int i = 0; i < batchCount; i++) {
+                int col = i % slotsPerRow;
+                int row = i / slotsPerRow;
+                int sx = lowerX + EnchantmentUIRenderer.PADDING + col * aspacing;
+                int sy = lowerY + aiy + row * aspacing;
 
-            widgets.add(new ScrollSlotWidget(applicableSlotIngredients.get(i), sx, sy,
-                    scrollWidget.scrollAmountSupplier(), scrollArea));
+                widgets.add(new ScrollSlotWidget(applicableSlotIngredients.get(i), sx, sy,
+                        scrollWidget.scrollAmountSupplier(), scrollArea));
+            }
         }
 
         int exclusiveCount = recipe.exclusiveStacks().size();
         if (exclusiveCount > 0) {
-            int applicableRows = EnchantmentScrollContent.calculateRows(batchCount, slotsPerRow);
-            int ciy = EnchantmentScrollContent.exclusiveSlotsStartY(aiy, applicableRows);
-            int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
-            int exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(lowerW, sbWidth);
+            int ciy = metrics.getExclusiveSlotsY();
+            if (ciy != -1) {
+                int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
+                int exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(lowerW, sbWidth);
 
-            for (int i = 0; i < exclusiveCount; i++) {
-                int col = i % exclusiveSlotsPerRow;
-                int row = i / exclusiveSlotsPerRow;
-                EmiIngredient ingredient = EmiStack.of(recipe.exclusiveStacks().get(i));
-                int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
-                int sy = lowerY + ciy + row * spacing;
+                for (int i = 0; i < exclusiveCount; i++) {
+                    int col = i % exclusiveSlotsPerRow;
+                    int row = i / exclusiveSlotsPerRow;
+                    int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
+                    int sy = lowerY + ciy + row * spacing;
 
-                widgets.add(new ScrollSlotWidget(ingredient, sx, sy,
-                        scrollWidget.scrollAmountSupplier(), scrollArea));
+                    widgets.add(new ScrollSlotWidget(exclusiveEmiIngredients.get(i), sx, sy,
+                            scrollWidget.scrollAmountSupplier(), scrollArea));
+                }
             }
         }
     }

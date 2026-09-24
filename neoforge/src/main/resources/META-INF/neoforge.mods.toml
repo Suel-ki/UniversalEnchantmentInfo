@@ -9,7 +9,7 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "${mod_author}"
 description = '''${mod_description}'''
-logoFile = "logo.png"
+iconFile = "logo.png"
 displayURL="https://github.com/Suel-ki/UniversalEnchantmentInfo"
 
 [[mixins]]
