@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Config {
 
@@ -97,6 +98,20 @@ public class Config {
 
     @ConfigSpec(min = 0, max = 16777215, isColor = true)
     public int rarityColorEpic = 16733695;
+
+    public enum Section {
+        DESCRIPTION, INFO_LINES, APPLIES_TO, EXCLUSIVES
+    }
+
+    public enum InfoField {
+        RARITY, MAX_LEVEL, TREASURE, TRADEABLE, CURSE, DISCOVERABLE, ENCHANTING_TABLE
+    }
+
+    @ConfigSpec
+    public List<Section> sectionOrder = List.of(Section.DESCRIPTION, Section.INFO_LINES, Section.APPLIES_TO, Section.EXCLUSIVES);
+
+    @ConfigSpec
+    public List<InfoField> infoOrder = List.of(InfoField.RARITY, InfoField.MAX_LEVEL, InfoField.TREASURE, InfoField.TRADEABLE, InfoField.CURSE, InfoField.DISCOVERABLE, InfoField.ENCHANTING_TABLE);
 
     public static Config get() {
         return INSTANCE;

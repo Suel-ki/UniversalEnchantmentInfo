@@ -128,33 +128,37 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
 
         widgets.add(scrollWidget);
 
-        int aiy = EnchantmentScrollContent.applicableItemStartY(recipe);
+        EnchantmentScrollContent.LayoutMetrics metrics = scrollWidget.getLayoutMetrics();
 
-        for (int i = 0; i < batchCount; i++) {
-            int col = i % slotsPerRow;
-            int row = i / slotsPerRow;
-            int sx = lowerX + EnchantmentUIRenderer.PADDING + col * aspacing;
-            int sy = lowerY + aiy + row * aspacing;
+        int aiy = metrics.getAppliesToSlotsY();
+        if (aiy != -1) {
+            for (int i = 0; i < batchCount; i++) {
+                int col = i % slotsPerRow;
+                int row = i / slotsPerRow;
+                int sx = lowerX + EnchantmentUIRenderer.PADDING + col * aspacing;
+                int sy = lowerY + aiy + row * aspacing;
 
-            widgets.add(new ScrollSlotWidget(applicableSlotIngredients.get(i), sx, sy,
-                    scrollWidget.scrollAmountSupplier(), scrollArea));
+                widgets.add(new ScrollSlotWidget(applicableSlotIngredients.get(i), sx, sy,
+                        scrollWidget.scrollAmountSupplier(), scrollArea));
+            }
         }
 
         int exclusiveCount = recipe.exclusiveStacks().size();
         if (exclusiveCount > 0) {
-            int applicableRows = EnchantmentScrollContent.calculateRows(batchCount, slotsPerRow);
-            int ciy = EnchantmentScrollContent.exclusiveSlotsStartY(aiy, applicableRows);
-            int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
-            int exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(lowerW, sbWidth);
+            int ciy = metrics.getExclusiveSlotsY();
+            if (ciy != -1) {
+                int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
+                int exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(lowerW, sbWidth);
 
-            for (int i = 0; i < exclusiveCount; i++) {
-                int col = i % exclusiveSlotsPerRow;
-                int row = i / exclusiveSlotsPerRow;
-                int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
-                int sy = lowerY + ciy + row * spacing;
+                for (int i = 0; i < exclusiveCount; i++) {
+                    int col = i % exclusiveSlotsPerRow;
+                    int row = i / exclusiveSlotsPerRow;
+                    int sx = lowerX + EnchantmentUIRenderer.PADDING + col * spacing;
+                    int sy = lowerY + ciy + row * spacing;
 
-                widgets.add(new ScrollSlotWidget(exclusiveEmiIngredients.get(i), sx, sy,
-                        scrollWidget.scrollAmountSupplier(), scrollArea));
+                    widgets.add(new ScrollSlotWidget(exclusiveEmiIngredients.get(i), sx, sy,
+                            scrollWidget.scrollAmountSupplier(), scrollArea));
+                }
             }
         }
     }

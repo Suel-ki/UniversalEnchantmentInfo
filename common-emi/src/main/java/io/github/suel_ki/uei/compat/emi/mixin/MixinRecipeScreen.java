@@ -60,4 +60,18 @@ public class MixinRecipeScreen {
             }
         }
     }
+
+    @Inject(method = "mouseReleased(Lnet/minecraft/client/input/MouseButtonEvent;)Z", at = @At("HEAD"))
+    private void uei_onMouseReleased(MouseButtonEvent event, CallbackInfoReturnable<Boolean> cir) {
+        if (currentPage == null) return;
+        for (WidgetGroup group : currentPage) {
+            double mx = event.x() - group.x();
+            double my = event.y() - group.y();
+            for (Widget widget : group.widgets) {
+                if (widget instanceof IMouseEvents scrollable) {
+                    scrollable.onMouseReleased(mx, my, event.button());
+                }
+            }
+        }
+    }
 }

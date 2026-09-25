@@ -20,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class ConfigScreen extends Screen {
     private final Screen parent;
@@ -54,7 +54,7 @@ public class ConfigScreen extends Screen {
                 }
 
                 f.setAccessible(true);
-                this.entries.add(new ConfigList.Entry(f, cfg, def, this.font, this::updateButtonValidity));
+                this.entries.add(new ConfigList.Entry(this, f, cfg, def, this.font, this::updateButtonValidity));
             }
         }
 
@@ -100,7 +100,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.setScreenAndShow(this.parent);
     }
 
     private static class ConfigList extends ContainerObjectSelectionList<ConfigList.Entry> {
@@ -126,12 +126,18 @@ public class ConfigScreen extends Screen {
             final Field field;
             final ConfigSpec spec;
             final String translationKey;
+
             final boolean isBool;
             final boolean isColor;
+            final boolean isList;
 
             String currentValStr;
             final String initialValStr;
             final String defaultValStr;
+
+            List<Object> currentList;
+            final List<Object> initialList;
+            final List<Object> defaultList;
 
             boolean valid = true;
             int colorPreview;
@@ -141,12 +147,14 @@ public class ConfigScreen extends Screen {
             private final Component label;
             private final Font font;
 
-            Entry(Field field, Config cfg, Config def, Font font, Runnable onChange) {
+            Entry(Screen parentScreen, Field field, Config cfg, Config def, Font font, Runnable onChange) {
                 this.field = field;
                 this.spec = field.getAnnotation(ConfigSpec.class);
                 this.translationKey = "uei.config." + field.getName().replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+
                 this.isBool = field.getType() == boolean.class;
-                this.isColor = !isBool && spec != null && spec.isColor();
+                this.isList = List.class.isAssignableFrom(field.getType());
+                this.isColor = !isBool && !isList && spec != null && spec.isColor();
                 this.font = font;
                 this.label = Component.translatable(this.translationKey).withStyle(ChatFormatting.WHITE);
 
@@ -159,15 +167,41 @@ public class ConfigScreen extends Screen {
                     Uei.LOGGER.error("Failed to read config field: {}", field.getName(), e);
                 }
 
-                this.initialValStr = String.valueOf(curObj);
+                if (isList) {
+                    this.initialValStr = "";
+                    this.defaultValStr = "";
+                    this.initialList = curObj instanceof List<?> l ? new ArrayList<>(l) : new ArrayList<>();
+                    this.defaultList = defObj instanceof List<?> l ? new ArrayList<>(l) : new ArrayList<>();
+                    this.currentList = new ArrayList<>(this.initialList);
+                } else {
+                    this.initialValStr = String.valueOf(curObj);
+                    this.defaultValStr = String.valueOf(defObj);
+                    this.initialList = null;
+                    this.defaultList = null;
+                }
+
                 this.currentValStr = this.initialValStr;
-                this.defaultValStr = String.valueOf(defObj);
 
                 if (isColor) {
                     try { this.colorPreview = 0xFF000000 | Integer.parseInt(this.currentValStr); } catch (Exception ignored) {}
                 }
 
-                if (isBool) {
+                if (isList) {
+                    this.valueWidget = Button.builder(Component.literal("Edit..."), btn -> {
+                        Minecraft.getInstance().setScreenAndShow(new ListEditScreen(parentScreen, this.label, this.currentList, newList -> {
+                            this.currentList = new ArrayList<>(newList);
+
+                            try {
+                                this.field.set(cfg, new ArrayList<>(this.currentList));
+                            } catch (Exception e) {
+                                Uei.LOGGER.error("Failed to set config field: {}", field.getName(), e);
+                            }
+
+                            this.updateResetButton();
+                            onChange.run();
+                        }));
+                    }).bounds(0, 0, 80, 20).build();
+                } else if (isBool) {
                     this.valueWidget = CycleButton.onOffBuilder(Boolean.parseBoolean(this.currentValStr))
                             .displayOnlyValue()
                             .create(0, 0, 80, 20, Component.empty(), (btn, val) -> {
@@ -204,6 +238,7 @@ public class ConfigScreen extends Screen {
 
             private boolean isEquivalentToDefault() {
                 if (!this.valid) return false;
+                if (isList) return this.currentList.equals(this.defaultList);
                 return areEquivalent(this.currentValStr, this.defaultValStr);
             }
 
@@ -219,22 +254,27 @@ public class ConfigScreen extends Screen {
                 int y = this.getY();
                 int width = this.getWidth();
                 int height = this.getHeight();
+
                 if (isMouseOver) {
                     graphics.fill(x, y - 2, x + width, y + height - 2, 0x1AFFFFFF);
                 }
                 graphics.text(this.font, this.label, x + width / 2 - 10 - this.font.width(this.label), y + 6, 0xFFFFFFFF);
+
                 this.valueWidget.setY(y);
                 this.valueWidget.setX(x + width / 2 + 10);
                 this.resetButton.setY(y);
                 this.resetButton.setX(x + width / 2 + (isColor ? 104 : 92));
+
                 this.valueWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 this.resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
+
                 if (isColor && valid) {
                     int cx = x + width / 2 + 93;
                     int cy = y + 5;
                     graphics.fill(cx, cy, cx + 10, cy + 10, colorPreview);
                 }
-                if (this.valueWidget.isMouseOver(mouseX, mouseY)) {
+
+                if (this.valueWidget.isMouseOver(mouseX, mouseY) && !isList) {
                     Component tooltip = getTooltip();
                     if (tooltip != null) graphics.setTooltipForNextFrame(this.font, tooltip, mouseX, mouseY);
                 }
@@ -251,7 +291,7 @@ public class ConfigScreen extends Screen {
             }
 
             boolean checkValidity() {
-                if (isBool) return true;
+                if (isBool || isList) return true;
                 try {
                     double v;
                     if (field.getType() == int.class) v = Integer.parseInt(this.currentValStr);
@@ -265,18 +305,21 @@ public class ConfigScreen extends Screen {
             }
 
             void reset() {
-                this.currentValStr = this.defaultValStr;
                 this.valid = true;
 
-                if (isBool && valueWidget instanceof CycleButton) {
-                    ((CycleButton<Boolean>) valueWidget).setValue(Boolean.parseBoolean(this.currentValStr));
-                } else if (valueWidget instanceof EditBox) {
-                    ((EditBox) valueWidget).setValue(this.currentValStr);
-                    ((EditBox) valueWidget).setTextColor(0xFFE0E0E0);
-                }
-
-                if (isColor) {
-                    try { this.colorPreview = 0xFF000000 | Integer.parseInt(this.currentValStr); } catch (Exception ignored) {}
+                if (isList) {
+                    this.currentList = new ArrayList<>(this.defaultList);
+                } else {
+                    this.currentValStr = this.defaultValStr;
+                    if (isBool && valueWidget instanceof CycleButton) {
+                        ((CycleButton<Boolean>) valueWidget).setValue(Boolean.parseBoolean(this.currentValStr));
+                    } else if (valueWidget instanceof EditBox) {
+                        ((EditBox) valueWidget).setValue(this.currentValStr);
+                        ((EditBox) valueWidget).setTextColor(0xFFE0E0E0);
+                    }
+                    if (isColor) {
+                        try { this.colorPreview = 0xFF000000 | Integer.parseInt(this.currentValStr); } catch (Exception ignored) {}
+                    }
                 }
                 this.updateResetButton();
             }
@@ -284,10 +327,17 @@ public class ConfigScreen extends Screen {
             void save(Config cfg) {
                 if (!valid) return;
                 try {
-                    if (isBool) field.setBoolean(cfg, Boolean.parseBoolean(this.currentValStr));
-                    else if (field.getType() == int.class) field.setInt(cfg, Integer.parseInt(this.currentValStr));
-                    else if (field.getType() == float.class) field.setFloat(cfg, Float.parseFloat(this.currentValStr));
-                    else if (field.getType() == double.class) field.setDouble(cfg, Double.parseDouble(this.currentValStr));
+                    if (isList) {
+                        field.set(cfg, new ArrayList<>(this.currentList));
+                    } else if (isBool) {
+                        field.setBoolean(cfg, Boolean.parseBoolean(this.currentValStr));
+                    } else if (field.getType() == int.class) {
+                        field.setInt(cfg, Integer.parseInt(this.currentValStr));
+                    } else if (field.getType() == float.class) {
+                        field.setFloat(cfg, Float.parseFloat(this.currentValStr));
+                    } else if (field.getType() == double.class) {
+                        field.setDouble(cfg, Double.parseDouble(this.currentValStr));
+                    }
                 } catch (Exception e) {
                     Uei.LOGGER.error("Failed to write config field '{}'", field.getName(), e);
                 }
@@ -295,6 +345,7 @@ public class ConfigScreen extends Screen {
 
             boolean hasChanged() {
                 if (!valid) return false;
+                if (isList) return !this.currentList.equals(this.initialList);
                 return !areEquivalent(this.currentValStr, this.initialValStr);
             }
 
@@ -327,6 +378,192 @@ public class ConfigScreen extends Screen {
                 if (bound == Double.NEGATIVE_INFINITY) return "-∞";
                 if (bound == Double.POSITIVE_INFINITY) return "∞";
                 return field.getType() == int.class ? String.valueOf((int) bound) : String.valueOf((float) bound);
+            }
+        }
+    }
+
+    public static class ListEditScreen extends Screen {
+        private final Screen parent;
+        private final List<Object> currentList;
+        private final Consumer<List<Object>> onSave;
+        private OrderList listWidget;
+
+        private final Map<Config.InfoField, Boolean> toggledStates = new HashMap<>();
+
+        public ListEditScreen(Screen parent, Component title, List<Object> list, Consumer<List<Object>> onSave) {
+            super(Component.literal("Edit: ").append(title));
+            this.parent = parent;
+            this.currentList = new ArrayList<>(list);
+            this.onSave = onSave;
+        }
+
+        @Override
+        protected void init() {
+            int listY = 33;
+            int listBottom = this.height - 35;
+            this.listWidget = new OrderList(this.minecraft, this.width, listBottom - listY, listY, 30);
+            this.addRenderableWidget(this.listWidget);
+            this.listWidget.updateEntries();
+
+            int buttonY = this.height - 26;
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, btn -> this.minecraft.setScreenAndShow(this.parent))
+                    .bounds(this.width / 2 - 155, buttonY, 150, 20).build());
+
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, btn -> {
+                this.onSave.accept(this.currentList);
+
+                this.toggledStates.forEach(this::setShowValue);
+
+                if (this.parent instanceof ConfigScreen cfgScreen) {
+                    cfgScreen.entries.clear();
+                }
+
+                this.minecraft.setScreenAndShow(this.parent);
+            }).bounds(this.width / 2 + 5, buttonY, 150, 20).build());
+        }
+
+        @Override
+        public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+            super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+            graphics.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
+        }
+
+        private boolean getShowValue(Config.InfoField field) {
+            return switch (field) {
+                case RARITY -> Config.get().showRarity;
+                case MAX_LEVEL -> Config.get().showMaxLevel;
+                case TREASURE -> Config.get().showTreasure;
+                case TRADEABLE -> Config.get().showTradeable;
+                case CURSE -> Config.get().showCurse;
+                case DISCOVERABLE -> Config.get().showDiscoverable;
+                case ENCHANTING_TABLE -> Config.get().showEnchantingTable;
+            };
+        }
+
+        private void setShowValue(Config.InfoField field, boolean value) {
+            switch (field) {
+                case RARITY -> Config.get().showRarity = value;
+                case MAX_LEVEL -> Config.get().showMaxLevel = value;
+                case TREASURE -> Config.get().showTreasure = value;
+                case TRADEABLE -> Config.get().showTradeable = value;
+                case CURSE -> Config.get().showCurse = value;
+                case DISCOVERABLE -> Config.get().showDiscoverable = value;
+                case ENCHANTING_TABLE -> Config.get().showEnchantingTable = value;
+            }
+        }
+
+        private class OrderList extends ContainerObjectSelectionList<OrderEntry> {
+            public OrderList(Minecraft mc, int width, int height, int y, int itemHeight) {
+                super(mc, width, height, y, itemHeight);
+            }
+
+            public void updateEntries() {
+                this.clearEntries();
+                for (int i = 0; i < currentList.size(); i++) {
+                    this.addEntry(new OrderEntry(i));
+                }
+            }
+
+            @Override
+            public int getRowWidth() {
+                return 280;
+            }
+
+            @Override
+            protected int scrollBarX() {
+                return this.width / 2 + 150;
+            }
+        }
+
+        private class OrderEntry extends ContainerObjectSelectionList.Entry<OrderEntry> {
+            private final int index;
+            private final Object item;
+            private final Button upBtn;
+            private final Button downBtn;
+            private Checkbox visibilityCheckbox;
+
+            public OrderEntry(int index) {
+                this.index = index;
+                this.item = currentList.get(index);
+
+                if (item instanceof Config.InfoField field) {
+                    boolean isVisible = toggledStates.computeIfAbsent(field, ListEditScreen.this::getShowValue);
+
+                    this.visibilityCheckbox = Checkbox.builder(Component.empty(), minecraft.font)
+                            .pos(0, 0)
+                            .selected(isVisible)
+                            .onValueChange((cb, val) -> toggledStates.put(field, val))
+                            .build();
+                }
+
+                this.upBtn = Button.builder(Component.literal("▲"), btn -> {
+                    Collections.swap(currentList, index, index - 1);
+                    listWidget.updateEntries();
+                }).bounds(0, 0, 24, 20).build();
+                this.upBtn.active = index > 0;
+
+                this.downBtn = Button.builder(Component.literal("▼"), btn -> {
+                    Collections.swap(currentList, index, index + 1);
+                    listWidget.updateEntries();
+                }).bounds(0, 0, 24, 20).build();
+                this.downBtn.active = index < currentList.size() - 1;
+            }
+
+            private Component getLocalizedName(Object item) {
+                if (item instanceof Config.InfoField field) {
+                    return Component.translatable("uei." + field.name().toLowerCase());
+                } else if (item instanceof Config.Section section) {
+                    return Component.translatable("uei.section." + section.name().toLowerCase());
+                }
+                return Component.literal(item.toString());
+            }
+
+            @Override
+            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+                int x = this.getX();
+                int y = this.getY();
+                int width = this.getWidth();
+                int itemHeight = 30;
+
+                if (isMouseOver) {
+                    graphics.fill(x, y, x + width, y + itemHeight, 0x1AFFFFFF);
+                }
+
+                int currentX = x + 10;
+
+                if (this.visibilityCheckbox != null) {
+                    this.visibilityCheckbox.setX(currentX);
+                    this.visibilityCheckbox.setY(y + (itemHeight - 20) / 2);
+                    this.visibilityCheckbox.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                    currentX += 26;
+                }
+
+                Component displayName = getLocalizedName(item);
+                int textY = y + (itemHeight - minecraft.font.lineHeight) / 2;
+                graphics.text(minecraft.font, displayName, currentX, textY, 0xFFFFFFFF);
+
+                this.upBtn.setX(x + width - 50);
+                this.upBtn.setY(y + (itemHeight - 20) / 2);
+
+                this.downBtn.setX(x + width - 25);
+                this.downBtn.setY(y + (itemHeight - 20) / 2);
+
+                this.upBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                this.downBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
+            }
+
+            @Override
+            public @NotNull List<? extends GuiEventListener> children() {
+                List<GuiEventListener> list = new ArrayList<>(List.of(this.upBtn, this.downBtn));
+                if (this.visibilityCheckbox != null) list.add(this.visibilityCheckbox);
+                return list;
+            }
+
+            @Override
+            public @NotNull List<? extends NarratableEntry> narratables() {
+                List<NarratableEntry> list = new ArrayList<>(List.of(this.upBtn, this.downBtn));
+                if (this.visibilityCheckbox != null) list.add(this.visibilityCheckbox);
+                return list;
             }
         }
     }
