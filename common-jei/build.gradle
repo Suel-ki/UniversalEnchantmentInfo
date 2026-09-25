@@ -3,6 +3,7 @@ architectury {
 }
 
 dependencies {
+    implementation 'org.jetbrains:annotations:15.0'
     compileOnly project(path: ":common", configuration: "namedElements")
     modCompileOnlyApi "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     modCompileOnly "mezz.jei:jei-${minecraft_version}-common:${jei_version}"

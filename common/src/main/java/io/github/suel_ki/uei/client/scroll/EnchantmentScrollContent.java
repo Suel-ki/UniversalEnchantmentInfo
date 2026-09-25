@@ -128,8 +128,7 @@ public final class EnchantmentScrollContent {
 
     public static void drawDescription(GuiGraphics g, Font font, List<FormattedCharSequence> descLines,
                                        int x, int y, int pad) {
-        g.drawString(font, DESCRIPTION,
-                x + pad, y + EnchantmentUIRenderer.DESC_HEADER_Y, -1, false);
+        g.drawString(font, DESCRIPTION, x + pad, y + EnchantmentUIRenderer.DESC_HEADER_Y, -1, false);
 
         int lh = font.lineHeight + 1;
         int descTextY = y + EnchantmentUIRenderer.DESC_TEXT_Y;
@@ -138,64 +137,65 @@ public final class EnchantmentScrollContent {
         }
     }
 
-    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
-                                    List<FormattedCharSequence> descLines,
-                                    int x, int y, int pad, int maxX) {
-        return drawInfoLines(g, font, recipe, descLines, x, y, pad, maxX, UNIVERSAL_SCISSOR);
-    }
-
-    public static int drawInfoLines(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
-                                    List<FormattedCharSequence> descLines,
-                                    int x, int y, int pad, int maxX,
-                                    ScissorRenderer scissorRenderer) {
-        int lh = font.lineHeight + 1;
-        int descHeight = descLines.size() * lh;
+    public static void drawAttributes(GuiGraphics g, Font font, EnchantmentRecipeData recipe,
+                                      int x, int y, int maxX, ScissorRenderer scissorRenderer) {
+        int lineY = y;
         int ilh = EnchantmentUIRenderer.INFO_LINE_HEIGHT;
-
         Config cfg = Config.get();
-        int lineY = y + EnchantmentUIRenderer.DESC_TEXT_Y + descHeight + 2;
-
-        if (cfg.showRarity) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    RARITY, recipe.rarityName(), -1, scissorRenderer);
-            lineY += ilh;
+        for (Config.InfoField field : cfg.infoOrder) {
+            switch (field) {
+                case RARITY -> {
+                    if (cfg.showRarity) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                RARITY, recipe.rarityName(), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case MAX_LEVEL -> {
+                    if (cfg.showMaxLevel) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                MAX_LEVEL, Component.literal(String.valueOf(recipe.maxLevel())), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case TREASURE -> {
+                    if (cfg.showTreasure) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                TREASURE, boolDisplay(recipe.treasure()), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case TRADEABLE -> {
+                    if (cfg.showTradeable) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                TRADEABLE, boolDisplay(recipe.tradeable()), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case CURSE -> {
+                    if (cfg.showCurse) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                CURSE, boolDisplay(recipe.curse()), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case DISCOVERABLE -> {
+                    if (cfg.showDiscoverable) {
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                DISCOVERABLE, boolDisplay(recipe.discoverable()), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+                case ENCHANTING_TABLE -> {
+                    if (cfg.showEnchantingTable) {
+                        boolean canEnchantTable = !recipe.treasure() && !recipe.curse();
+                        drawInfoLine(g, font, x, lineY, maxX,
+                                ENCHANTING_TABLE, boolDisplay(canEnchantTable), -1, scissorRenderer);
+                        lineY += ilh;
+                    }
+                }
+            }
         }
-        if (cfg.showMaxLevel) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    MAX_LEVEL, Component.literal(String.valueOf(recipe.maxLevel())), -1, scissorRenderer);
-            lineY += ilh;
-        }
-        if (cfg.showTreasure) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    TREASURE, boolDisplay(recipe.treasure()), -1, scissorRenderer);
-            lineY += ilh;
-        }
-        if (cfg.showTradeable) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    TRADEABLE, boolDisplay(recipe.tradeable()), -1, scissorRenderer);
-            lineY += ilh;
-        }
-        if (cfg.showCurse) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    CURSE, boolDisplay(recipe.curse()), -1, scissorRenderer);
-            lineY += ilh;
-        }
-        if (cfg.showDiscoverable) {
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    DISCOVERABLE, boolDisplay(recipe.discoverable()), -1, scissorRenderer);
-            lineY += ilh;
-        }
-        if (cfg.showEnchantingTable) {
-            boolean canEnchantTable = !recipe.treasure() && !recipe.curse();
-            drawInfoLine(g, font, x + pad, lineY, maxX,
-                    ENCHANTING_TABLE, boolDisplay(canEnchantTable), -1, scissorRenderer);
-            lineY += ilh;
-        }
-
-        int ahy = lineY + 2;
-        renderScrollingString(g, font, APPLIES_TO, x + pad, ahy, maxX, ahy + font.lineHeight, -1, scissorRenderer);
-
-        return ahy + ilh;
     }
 
     public static int computeContentHeight(EnchantmentRecipeData recipe,
@@ -207,29 +207,30 @@ public final class EnchantmentScrollContent {
                 + exclusiveRows * EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING + EnchantmentUIRenderer.PADDING;
     }
 
-    public static int maxScroll(EnchantmentRecipeData recipe, int applicableRows,
-                                int exclusiveSlotCount, int exclusiveSlotsPerRow, int visibleHeight) {
-        int contentH = computeContentHeight(recipe, applicableRows, exclusiveSlotCount, exclusiveSlotsPerRow);
-        return Math.max(contentH - visibleHeight, 0);
-    }
-
     public static int applicableItemStartY(EnchantmentRecipeData recipe) {
         return applicableItemStartY(recipe.descriptionLines(Minecraft.getInstance().font));
     }
 
     public static int applicableItemStartY(List<FormattedCharSequence> descLines) {
-        var font = Minecraft.getInstance().font;
-        int lineH = font.lineHeight + 1;
-        int descHeight = descLines.size() * lineH;
+        int currentY = 0;
         int ilh = EnchantmentUIRenderer.INFO_LINE_HEIGHT;
-        int infoY = EnchantmentUIRenderer.DESC_TEXT_Y + descHeight + 2;
-        int visibleLines = visibleInfoLineCount();
-        int ahy = infoY + ilh * visibleLines + 2;
-        return ahy + ilh;
+        Config cfg = Config.get();
+        var font = Minecraft.getInstance().font;
+
+        for (Config.Section sec : cfg.sectionOrder) {
+            if (sec == Config.Section.APPLIES_TO) {
+                return currentY + font.lineHeight;
+            }
+            switch (sec) {
+                case DESCRIPTION -> currentY += EnchantmentUIRenderer.DESC_TEXT_Y + descLines.size() * (font.lineHeight + 1) + 2;
+                case INFO_LINES -> currentY += visibleInfoLineCount(cfg) * ilh + 2;
+                case EXCLUSIVES -> currentY += font.lineHeight + 2;
+            }
+        }
+        return currentY + font.lineHeight;
     }
 
-    private static int visibleInfoLineCount() {
-        Config cfg = Config.get();
+    private static int visibleInfoLineCount(Config cfg) {
         int count = 0;
         if (cfg.showRarity) count++;
         if (cfg.showMaxLevel) count++;
@@ -248,7 +249,8 @@ public final class EnchantmentScrollContent {
 
     // Compute exclusive slots start Y
     public static int exclusiveSlotsStartY(int aiy, int applicableRows) {
-        return exclusiveHeaderStartY(aiy, applicableRows) + EnchantmentUIRenderer.INFO_LINE_HEIGHT;
+        var font = Minecraft.getInstance().font;
+        return exclusiveHeaderStartY(aiy, applicableRows) + font.lineHeight;
     }
 
     // Batch applicable items by max slot count, evenly distributed
@@ -307,5 +309,48 @@ public final class EnchantmentScrollContent {
 
     public static int gridY(int index, int perRow, int startY, int spacing) {
         return startY + (index / perRow) * spacing;
+    }
+
+    public static class LayoutMetrics {
+        public int descY = -1, infoY = -1, appliesToY = -1, exclusivesY = -1;
+        public int contentHeight;
+
+        public LayoutMetrics(EnchantmentRecipeData recipe, Font font, int appRows, int excRows) {
+            int currentY = 0;
+            int ilh = EnchantmentUIRenderer.INFO_LINE_HEIGHT;
+            Config cfg = Config.get();
+
+            for (Config.Section sec : cfg.sectionOrder) {
+                switch (sec) {
+                    case DESCRIPTION -> {
+                        this.descY = currentY;
+                        int lines = recipe.descriptionLines(font).size();
+                        currentY += EnchantmentUIRenderer.DESC_TEXT_Y + lines * (font.lineHeight + 1) + 2;
+                    }
+                    case INFO_LINES -> {
+                        this.infoY = currentY;
+                        currentY += visibleInfoLineCount(cfg) * ilh + 2;
+                    }
+                    case APPLIES_TO -> {
+                        this.appliesToY = currentY;
+                        currentY += font.lineHeight + appRows * EnchantmentUIRenderer.APPLICABLE_SLOT_SPACING + 2;
+                    }
+                    case EXCLUSIVES -> {
+                        this.exclusivesY = currentY;
+                        int actualExcRows = Math.max(excRows, 0);
+                        currentY += font.lineHeight + actualExcRows * EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING + 2;
+                    }
+                }
+            }
+            this.contentHeight = currentY + EnchantmentUIRenderer.PADDING;
+        }
+
+        public int getAppliesToSlotsY() {
+            return appliesToY == -1 ? -1 : appliesToY + Minecraft.getInstance().font.lineHeight;
+        }
+
+        public int getExclusiveSlotsY() {
+            return exclusivesY == -1 ? -1 : exclusivesY + Minecraft.getInstance().font.lineHeight;
+        }
     }
 }
