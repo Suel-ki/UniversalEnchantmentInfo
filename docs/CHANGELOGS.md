@@ -15,3 +15,11 @@ Version [26.2-1.2.0] - 2026-08-03
 - Support custom enchantment translation keys
 
 
+
+Version [26.2-1.4.0] - 2026-09-25
+
+### Features
+
+- Add layout customization for enchantment info
+
+
