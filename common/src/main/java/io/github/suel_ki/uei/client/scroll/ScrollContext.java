@@ -1,5 +1,6 @@
 package io.github.suel_ki.uei.client.scroll;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.suel_ki.uei.client.render.ScrollbarRenderer;
 import io.github.suel_ki.uei.config.Config;
 import net.minecraft.client.gui.GuiGraphics;
@@ -77,6 +78,11 @@ public class ScrollContext {
     // endregion
 
     // region Input
+
+    private static boolean isPrimaryButton(int button) {
+        return button == InputConstants.MOUSE_BUTTON_LEFT;
+    }
+
     public boolean mouseScrolled(double amount) {
         int max = maxScrollSupplier.getAsInt();
         if (max > 0) {
@@ -90,7 +96,7 @@ public class ScrollContext {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         dragging = false;
         int max = maxScrollSupplier.getAsInt();
-        if (button != 0 || max <= 0) {
+        if (!isPrimaryButton(button) || max <= 0) {
             return false;
         }
         if (!isOnTrack(mouseX, mouseY)) {
@@ -116,7 +122,7 @@ public class ScrollContext {
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button) {
-        if (!dragging || button != 0) {
+        if (!dragging || !isPrimaryButton(button)) {
             return false;
         }
 

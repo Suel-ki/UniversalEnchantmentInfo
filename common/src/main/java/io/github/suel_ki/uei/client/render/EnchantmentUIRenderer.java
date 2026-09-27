@@ -15,7 +15,6 @@ public class EnchantmentUIRenderer {
     public static final int LOWER_START_Y = 34;
     public static final int PADDING = 4;
 
-    public static final int DESC_HEADER_Y = 0;
     public static final int DESC_TEXT_Y = 10;
     public static final int INFO_LINE_HEIGHT = 9;
 

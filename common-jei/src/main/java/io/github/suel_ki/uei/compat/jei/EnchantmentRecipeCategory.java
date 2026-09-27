@@ -66,8 +66,7 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, EnchantmentRecipeData recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.OUTPUT,
-                        EnchantmentUIRenderer.SLOT_X, EnchantmentUIRenderer.SLOT_Y)
+        builder.addOutputSlot(EnchantmentUIRenderer.SLOT_X, EnchantmentUIRenderer.SLOT_Y)
                 .addItemStacks(recipe.allLevelBooks())
                 .setStandardSlotBackground();
 
