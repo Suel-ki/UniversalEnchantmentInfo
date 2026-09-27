@@ -19,3 +19,13 @@ Version [1.21.1-1.2.0] - 2026-08-02
 - Support custom enchantment translation keys
 
 
+
+Version [1.21.1-1.3.0] - 2026-08-26
+
+### Features
+
+- LookupEnchantmentsByItem config
+
+- Apotheosis compat ([#26](https://github.com/Suel-ki/UniversalEnchantmentInfo/issues/26))
+
+
