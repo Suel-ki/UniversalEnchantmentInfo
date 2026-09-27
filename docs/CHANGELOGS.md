@@ -29,3 +29,11 @@ Version [1.21.1-1.3.0] - 2026-08-26
 - Apotheosis compat ([#26](https://github.com/Suel-ki/UniversalEnchantmentInfo/issues/26))
 
 
+
+Version [1.21.1-1.4.0] - 2026-09-27
+
+### Features
+
+- Add layout customization for enchantment info
+
+
