@@ -59,4 +59,18 @@ public class MixinRecipeScreen {
             }
         }
     }
+
+    @Inject(method = "mouseReleased(DDI)Z", at = @At("HEAD"))
+    private void uei_onMouseReleased(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        if (currentPage == null) return;
+        for (WidgetGroup group : currentPage) {
+            double mx = mouseX - group.x();
+            double my = mouseY - group.y();
+            for (Widget widget : group.widgets) {
+                if (widget instanceof IMouseEvents scrollable) {
+                    scrollable.onMouseReleased(mx, my, button);
+                }
+            }
+        }
+    }
 }
