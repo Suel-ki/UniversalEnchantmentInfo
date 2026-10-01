@@ -31,3 +31,9 @@ Version [26.2-1.5.0] - 2026-10-01
 - [RRV](https://github.com/cassiancc/ReliableRecipeViewer) compat
 
 
+
+Version [26.3-1.5.0] - 2026-10-01
+
+### Features
+
+- [RRV](https://github.com/cassiancc/ReliableRecipeViewer) compat
