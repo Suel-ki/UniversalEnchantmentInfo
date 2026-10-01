@@ -29,3 +29,11 @@ Version [1.21.11-1.4.0] - 2026-09-25
 - Add layout customization for enchantment info
 
 
+
+Version [1.21.11-1.5.0] - 2026-10-01
+
+### Features
+
+- [RRV](https://github.com/cassiancc/ReliableRecipeViewer) compat
+
+
