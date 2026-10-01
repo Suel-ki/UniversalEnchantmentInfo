@@ -25,3 +25,11 @@ Version [26.1.2-1.3.0] - 2026-08-26
 - Apothic Enchanting compat
 
 
+
+Version [26.1.2-1.4.0] - 2026-09-25
+
+### Features
+
+- Add layout customization for enchantment info
+
+
