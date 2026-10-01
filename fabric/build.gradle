@@ -19,6 +19,7 @@ base {
 def emi_available = emi_enabled == "true" && project.findProperty("${project.name}_emi_enabled") == "true"
 def jei_available = jei_enabled == "true" && project.findProperty("${project.name}_jei_enabled") == "true"
 def rei_available = rei_enabled == "true" && project.findProperty("${project.name}_rei_enabled") == "true"
+def rrv_available = rrv_enabled == "true" && project.findProperty("${project.name}_rrv_enabled") == "true"
 
 configurations {
     common
@@ -47,6 +48,10 @@ dependencies {
     if (rei_available) {
         common(project(path: ":common-rei")) { transitive false }
         shadowCommon(project(path: ":common-rei", configuration: "transformProductionFabric")) { transitive = false }
+    }
+    if (rrv_available) {
+        common(project(path: ":common-rrv")) { transitive false }
+        shadowCommon(project(path: ":common-rrv", configuration: "transformProductionFabric")) { transitive = false }
     }
 }
 
@@ -108,6 +113,7 @@ publishMods {
         optional("jei")
         optional("emi")
         optional("roughly-enough-items")
+        optional("rrv")
     }
 
     modrinth {
@@ -118,5 +124,6 @@ publishMods {
         optional("jei")
         optional("emi")
         optional("rei")
+        optional("rrv")
     }
 }

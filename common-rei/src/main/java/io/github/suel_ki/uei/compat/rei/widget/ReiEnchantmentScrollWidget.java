@@ -56,7 +56,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     }
 
     private void updateLayoutMetrics() {
-        int excRows = exclusiveSlots.isEmpty() ? 0 : EnchantmentScrollContent.calculateRows(exclusiveSlots.size(), exclusiveSlotsPerRow);
+        int excRows = EnchantmentScrollContent.calculateRows(exclusiveSlots.size(), exclusiveSlotsPerRow);
         this.layoutMetrics = new EnchantmentScrollContent.LayoutMetrics(
                 this.recipe, Minecraft.getInstance().font, applicableRows(), excRows
         );
@@ -77,7 +77,7 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
     }
 
     private int maxScroll() {
-        return Math.max(layoutMetrics.contentHeight - bounds.height, 0);
+        return layoutMetrics.maxScroll(bounds.height);
     }
 
     private float scrollAmount() {

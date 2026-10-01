@@ -1,10 +1,10 @@
 {
-  "required": true,
-  "package": "io.github.suel_ki.uei.compat.emi.mixin",
+  "required": false,
+  "package": "io.github.suel_ki.uei.compat.rrv.mixin",
   "compatibilityLevel": "JAVA_25",
   "minVersion": "0.8",
   "client": [
-    "MixinRecipeScreen"
+    "MixinRecipeViewScreen"
   ],
   "injectors": {
     "defaultRequire": 0

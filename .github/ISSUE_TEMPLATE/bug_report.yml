@@ -49,7 +49,7 @@ body:
       label: "Steps to Reproduce"
       description: "How do we make this happen again?"
       placeholder: |
-        1. Open the game with JEI/REI/EMI installed
+        1. Open the game with JEI/REI/EMI/RRV installed
         2. Press 'R' on an Enchanted Book
         3. Scroll down the applicable items list
         4. See error/visual glitch...

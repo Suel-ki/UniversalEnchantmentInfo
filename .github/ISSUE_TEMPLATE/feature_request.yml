@@ -21,7 +21,7 @@ body:
       description: "What kind of suggestion is this?"
       options:
         - UI / Layout Improvement
-        - Viewer Integration (EMI/REI/JEI)
+        - Viewer Integration (EMI/REI/JEI/RRV)
         - Compatibility (with other mods)
         - Performance / Optimization
         - Documentation / Localization

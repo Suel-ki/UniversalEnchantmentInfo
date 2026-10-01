@@ -30,9 +30,13 @@ public record EnchantmentRecipeData(
 
 ) {
 
-    private static final int MAX_DESC_WIDTH = 144;
+    public static final int MAX_DESC_WIDTH = 144;
 
     public List<FormattedCharSequence> descriptionLines(Font font) {
+        return descriptionLines(font, MAX_DESC_WIDTH);
+    }
+
+    public List<FormattedCharSequence> descriptionLines(Font font, int maxWidth) {
         String key = enchantmentProperties.descriptionId();
         if (this.enchantment.value().description().getContents() instanceof TranslatableContents translatable) {
             key = translatable.getKey();
@@ -47,7 +51,7 @@ public record EnchantmentRecipeData(
             description = Component.translatable("uei.no_description").withStyle(ChatFormatting.BLACK);
         }
 
-        return font.split(description, MAX_DESC_WIDTH);
+        return font.split(description, maxWidth);
     }
 
     public int maxLevel() {
