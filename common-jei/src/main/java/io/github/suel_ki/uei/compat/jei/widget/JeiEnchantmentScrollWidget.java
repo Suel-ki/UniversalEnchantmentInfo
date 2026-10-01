@@ -65,7 +65,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
     }
 
     private void updateLayoutMetrics() {
-        int excRows = exclusiveSlots.isEmpty() ? 0 : EnchantmentScrollContent.calculateRows(exclusiveSlots.size(), exclusiveSlotsPerRow);
+        int excRows = EnchantmentScrollContent.calculateRows(exclusiveSlots.size(), exclusiveSlotsPerRow);
         this.layoutMetrics = new EnchantmentScrollContent.LayoutMetrics(
                 this.recipe, Minecraft.getInstance().font, applicableRows(), excRows
         );
@@ -76,7 +76,7 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
     }
 
     private int maxScroll() {
-        return Math.max(layoutMetrics.contentHeight - contentsArea.height(), 0);
+        return layoutMetrics.maxScroll(contentsArea.height());
     }
 
     @Override

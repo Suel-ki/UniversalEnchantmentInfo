@@ -11,6 +11,10 @@ authors = "${mod_author}"
 description = '''${mod_description}'''
 logoFile = "logo.png"
 displayURL="https://github.com/Suel-ki/UniversalEnchantmentInfo"
+rrv_client = "io.github.suel_ki.uei.compat.rrv.RRVPlugin"
+
+[[mixins]]
+config = "uei.rrv.mixins.json"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
@@ -37,6 +41,13 @@ side="BOTH"
 modId="rei"
 type="optional"
 versionRange="${rei_version_range}"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="rrv"
+type="optional"
+versionRange="${rrv_version_range}"
 ordering="AFTER"
 side="BOTH"
 
