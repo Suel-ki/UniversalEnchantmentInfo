@@ -18,6 +18,9 @@ if (settings.jei_enabled == "true") {
 if (settings.rei_enabled == "true") {
     include("common-rei")
 }
+if (settings.rrv_enabled == "true") {
+    include("common-rrv")
+}
 
 include("fabric")
 include("neoforge")

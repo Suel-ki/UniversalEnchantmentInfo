@@ -30,10 +30,14 @@
     ],
     "rei_client": [
       "io.github.suel_ki.uei.compat.rei.REIPlugin"
+    ],
+    "rrv_client": [
+      "io.github.suel_ki.uei.compat.rrv.RRVPlugin"
     ]
   },
   "mixins": [
-    "uei.emi.mixins.json"
+    "uei.emi.mixins.json",
+    "uei.rrv.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
@@ -43,6 +47,7 @@
   "suggests": {
     "emi": "${emi_version_range_fabric}",
     "jei": "${jei_version_range_fabric}",
-    "rei": "${rei_version_range_fabric}"
+    "rei": "${rei_version_range_fabric}",
+    "rrv": "${rrv_version_range_fabric}"
   }
 }

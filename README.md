@@ -1,6 +1,6 @@
 <div align="center">
 
-# Universal Enchantment Info (JEI/REI/EMI)
+# Universal Enchantment Info (JEI/REI/EMI/RRV)
 
 <img align="right" width="100" src="common/src/main/resources/logo.png" alt="Logo">
 
@@ -17,7 +17,7 @@
 
 ## About
 
-A JEI/REI/EMI plugin that displays detailed enchantment information.
+A JEI/REI/EMI/RRV plugin that displays detailed enchantment information.
 
 ## Usage
 

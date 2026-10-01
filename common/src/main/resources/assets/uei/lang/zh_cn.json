@@ -40,7 +40,7 @@
   "uei.section.description": "附魔描述",
   "uei.section.info_lines": "信息栏",
   "uei.section.applies_to": "适用物品",
-  "uei.section.exclusives": "排斥附魔",
+  "uei.section.exclusives": "互斥附魔",
   "uei.config.reload_notice": "修改后需重载资源（F3+T 或 /reload）",
   "uei.config.reset": "重置",
   "uei.config.tooltip.range": "有效范围：%s ~ %s",

@@ -43,8 +43,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     }
 
     private void updateLayoutMetrics() {
-        int excRows = recipe.exclusiveStacks().isEmpty() ? 0 :
-                EnchantmentScrollContent.calculateRows(recipe.exclusiveStacks().size(), exclusiveSlotsPerRow);
+        int excRows = EnchantmentScrollContent.calculateRows(recipe.exclusiveStacks().size(), exclusiveSlotsPerRow);
         this.layoutMetrics = new EnchantmentScrollContent.LayoutMetrics(
                 this.recipe, Minecraft.getInstance().font, applicableRows(), excRows
         );
@@ -64,7 +63,7 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     }
 
     private int maxScroll() {
-        return Math.max(layoutMetrics.contentHeight - bounds.height(), 0);
+        return layoutMetrics.maxScroll(bounds.height());
     }
 
     private float getScrollAmount() {
