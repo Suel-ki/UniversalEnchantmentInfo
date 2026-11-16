@@ -66,7 +66,7 @@ Each line can be toggled independently; `Info Order` and `Section Order` control
 | Show Curse | `true` | Curse line |
 | Show Discoverable | `true` | Loot discoverable line |
 | Show Enchanting Table | `true` | Whether the enchantment can come from an enchanting table |
-| Show Table Level | `true` | Enchanting table level range the enchantment needs |
+| Show Enchanting Power | `true` | Enchanting power window in which the highest level can be rolled (hidden for treasure and curse enchantments) |
 | Info Order | all lines | Order of the info lines |
 | Section Order | description, info, items, exclusives | Order of the panel sections |
 

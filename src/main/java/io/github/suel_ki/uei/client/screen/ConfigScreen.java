@@ -158,6 +158,7 @@ public class ConfigScreen extends Screen {
             final boolean isColor;
             final boolean isList;
             final boolean editableList;
+            final boolean isEnum;
 
             String currentValStr;
             final String initialValStr;
@@ -185,7 +186,8 @@ public class ConfigScreen extends Screen {
                 this.editableList = isList
                         && field.getGenericType() instanceof ParameterizedType parameterized
                         && parameterized.getActualTypeArguments()[0] == String.class;
-                this.isColor = !isBool && !isList && spec != null && spec.isColor();
+                this.isEnum = field.getType().isEnum();
+                this.isColor = !isBool && !isList && !isEnum && spec != null && spec.isColor();
                 this.font = font;
                 this.label = Component.translatable(this.translationKey).withStyle(ChatFormatting.WHITE);
 
@@ -240,6 +242,21 @@ public class ConfigScreen extends Screen {
                                 this.updateResetButton();
                                 onChange.run();
                             });
+                } else if (isEnum) {
+                    this.valueWidget = Button.builder(Component.literal(this.currentValStr), btn -> {
+                        Object[] constants = field.getType().getEnumConstants();
+                        int index = 0;
+                        for (int i = 0; i < constants.length; i++) {
+                            if (((Enum<?>) constants[i]).name().equals(this.currentValStr)) {
+                                index = i;
+                                break;
+                            }
+                        }
+                        this.currentValStr = ((Enum<?>) constants[(index + 1) % constants.length]).name();
+                        btn.setMessage(Component.literal(this.currentValStr));
+                        this.updateResetButton();
+                        onChange.run();
+                    }).bounds(0, 0, 80, 20).build();
                 } else {
                     EditBox box = new EditBox(font, 0, 0, 80, 20, Component.empty());
                     box.setValue(this.currentValStr);
@@ -337,7 +354,7 @@ public class ConfigScreen extends Screen {
             }
 
             boolean checkValidity() {
-                if (isBool || isList) return true;
+                if (isBool || isList || isEnum) return true;
                 try {
                     double v;
                     if (field.getType() == int.class) v = Integer.parseInt(this.currentValStr);
@@ -367,6 +384,9 @@ public class ConfigScreen extends Screen {
                         try { this.colorPreview = 0xFF000000 | Integer.parseInt(this.currentValStr); } catch (Exception ignored) {}
                     }
                 }
+                if (isEnum && this.valueWidget instanceof Button enumButton) {
+                    enumButton.setMessage(Component.literal(this.currentValStr));
+                }
                 this.updateResetButton();
             }
 
@@ -375,6 +395,8 @@ public class ConfigScreen extends Screen {
                 try {
                     if (isList) {
                         field.set(cfg, new ArrayList<>(this.currentList));
+                    } else if (isEnum) {
+                        field.set(cfg, Enum.valueOf((Class<Enum>) field.getType(), this.currentValStr));
                     } else if (isBool) {
                         field.setBoolean(cfg, Boolean.parseBoolean(this.currentValStr));
                     } else if (field.getType() == int.class) {
@@ -513,6 +535,7 @@ public class ConfigScreen extends Screen {
                 case CURSE -> Config.get().showCurse;
                 case DISCOVERABLE -> Config.get().showDiscoverable;
                 case ENCHANTING_TABLE -> Config.get().showEnchantingTable;
+                case ENCHANTING_POWER -> Config.get().showEnchantingPower;
             };
         }
 
@@ -525,6 +548,7 @@ public class ConfigScreen extends Screen {
                 case CURSE -> Config.get().showCurse = value;
                 case DISCOVERABLE -> Config.get().showDiscoverable = value;
                 case ENCHANTING_TABLE -> Config.get().showEnchantingTable = value;
+                case ENCHANTING_POWER -> Config.get().showEnchantingPower = value;
             }
         }
 

@@ -72,6 +72,9 @@ public class Config {
     @ConfigSpec(impactsCache = true)
     public List<String> blacklistedEnchantments = new ArrayList<>();
 
+    @ConfigSpec(impactsCache = true)
+    public ItemSort applicableItemSort = ItemSort.REGISTRY;
+
     @ConfigSpec
     public boolean useTextForBooleans = false;
 
@@ -96,6 +99,9 @@ public class Config {
     @ConfigSpec
     public boolean showEnchantingTable = true;
 
+    @ConfigSpec
+    public boolean showEnchantingPower = true;
+
     @ConfigSpec(min = 0, max = 16777215, isColor = true)
     public int rarityColorCommon = 16777215;
 
@@ -117,18 +123,51 @@ public class Config {
         DESCRIPTION, INFO_LINES, APPLIES_TO, EXCLUSIVES
     }
 
+    public enum ItemSort {
+        REGISTRY, NAME, MOD
+    }
+
     public enum InfoField {
-        RARITY, MAX_LEVEL, TREASURE, TRADEABLE, CURSE, DISCOVERABLE, ENCHANTING_TABLE
+        RARITY, MAX_LEVEL, TREASURE, TRADEABLE, CURSE, DISCOVERABLE, ENCHANTING_TABLE, ENCHANTING_POWER
     }
 
     @ConfigSpec
     public List<Section> sectionOrder = List.of(Section.DESCRIPTION, Section.INFO_LINES, Section.APPLIES_TO, Section.EXCLUSIVES);
 
     @ConfigSpec
-    public List<InfoField> infoOrder = List.of(InfoField.RARITY, InfoField.MAX_LEVEL, InfoField.TREASURE, InfoField.TRADEABLE, InfoField.CURSE, InfoField.DISCOVERABLE, InfoField.ENCHANTING_TABLE);
+    public List<InfoField> infoOrder = List.of(InfoField.RARITY, InfoField.MAX_LEVEL, InfoField.TREASURE, InfoField.TRADEABLE, InfoField.CURSE, InfoField.DISCOVERABLE, InfoField.ENCHANTING_TABLE, InfoField.ENCHANTING_POWER);
 
     public static Config get() {
         return INSTANCE;
+    }
+
+    private void sanitizeOrders() {
+        List<Section> sections = new ArrayList<>();
+        if (this.sectionOrder != null) {
+            for (Section section : this.sectionOrder) {
+                if (section != null && !sections.contains(section)) {
+                    sections.add(section);
+                }
+            }
+        }
+        if (sections.isEmpty()) {
+            sections.addAll(List.of(Section.values()));
+        }
+        this.sectionOrder = sections;
+
+        List<InfoField> fields = new ArrayList<>();
+        if (this.infoOrder != null) {
+            for (InfoField field : this.infoOrder) {
+                InfoField resolved = field == null ? InfoField.ENCHANTING_POWER : field;
+                if (!fields.contains(resolved)) {
+                    fields.add(resolved);
+                }
+            }
+        }
+        if (fields.isEmpty()) {
+            fields.addAll(List.of(InfoField.values()));
+        }
+        this.infoOrder = fields;
     }
 
     private void validate() {
@@ -179,6 +218,7 @@ public class Config {
                 String json = Files.readString(file);
                 Config cfg = GSON.fromJson(json, Config.class);
                 if (cfg != null) {
+                    cfg.sanitizeOrders();
                     cfg.validate();
                     return cfg;
                 }

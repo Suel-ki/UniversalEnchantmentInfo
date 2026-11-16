@@ -67,8 +67,17 @@ public record EnchantmentRecipeData(
         return enchantmentProperties.maxLevel();
     }
 
+    public String enchantingPowerRange() {
+        int max = Math.max(1, maxLevel());
+        return enchantment.getMinCost(max) + "\u2013" + enchantment.getMaxCost(max);
+    }
+
     public boolean curse() {
         return enchantmentProperties.curse();
+    }
+
+    public boolean tableObtainable() {
+        return !enchantmentProperties.treasureOnly() && !enchantmentProperties.curse();
     }
 
     public boolean treasure() {
@@ -201,8 +210,18 @@ public record EnchantmentRecipeData(
         return enchantmentProperties.maxLevel();
     }
 
+    public String enchantingPowerRange() {
+        Enchantment value = this.enchantment.value();
+        int max = Math.max(1, maxLevel());
+        return value.getMinCost(max) + "\u2013" + value.getMaxCost(max);
+    }
+
     public boolean curse() {
         return enchantmentProperties.curse();
+    }
+
+    public boolean tableObtainable() {
+        return !enchantmentProperties.treasureOnly() && !enchantmentProperties.curse();
     }
 
     public boolean treasure() {

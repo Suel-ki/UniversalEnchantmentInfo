@@ -17,6 +17,7 @@
   "uei.category.weapon": "武器",
   "uei.category.wearable": "可穿戴物品",
   "uei.config.apothic_compat": "神化附魔兼容",
+  "uei.config.applicable_item_sort": "适用物品排序",
   "uei.config.blacklisted_enchantments": "黑名单附魔",
   "uei.config.blacklisted_mods": "黑名单模组",
   "uei.config.info_order": "信息显示顺序",
@@ -36,6 +37,7 @@
   "uei.config.show_enchanting_table": "显示附魔台获得",
   "uei.config.show_max_level": "显示最高等级",
   "uei.config.show_rarity": "显示稀有度",
+  "uei.config.show_enchanting_power": "显示附魔等级需求",
   "uei.config.show_tradeable": "显示可交易",
   "uei.config.show_treasure": "显示宝藏附魔",
   "uei.config.text_scroll_speed_multiplier": "文字滚动速度",
@@ -63,5 +65,6 @@
   "uei.section.exclusives": "互斥附魔",
   "uei.section.info_lines": "信息栏",
   "uei.tradeable": "可交易：",
+  "uei.enchanting_power": "附魔等级需求",
   "uei.treasure": "宝藏附魔："
 }

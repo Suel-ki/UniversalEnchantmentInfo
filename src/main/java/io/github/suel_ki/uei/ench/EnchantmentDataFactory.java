@@ -2,6 +2,7 @@
 /*package io.github.suel_ki.uei.ench;
 
 import io.github.suel_ki.uei.compat.apothic.ApothicCompat;
+import io.github.suel_ki.uei.config.Config;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
@@ -11,6 +12,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ public class EnchantmentDataFactory {
             Enchantment targetEnchantment = allEnchantments.get(i);
             List<ItemStack> applicable = validStacks.stream()
                     .filter(targetEnchantment::canEnchant)
+                    .sorted(applicableItemComparator())
                     .toList();
 
             List<List<ItemStack>> exclusiveBooks = new ArrayList<>();
@@ -79,6 +82,17 @@ public class EnchantmentDataFactory {
         return CACHED_RECIPES;
     }
 
+    private static Comparator<ItemStack> applicableItemComparator() {
+        return switch (Config.get().applicableItemSort) {
+            case NAME -> Comparator.comparing(stack -> stack.getHoverName().getString(), String.CASE_INSENSITIVE_ORDER);
+            case MOD -> Comparator.comparing(stack -> {
+                var key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                return key == null ? "" : key.getNamespace();
+            });
+            case REGISTRY -> (a, b) -> 0;
+        };
+    }
+
     public static void invalidateCache() {
         CACHED_RECIPES = null;
     }
@@ -96,6 +110,7 @@ import net.minecraft.core.RegistryAccess;
 //? if >=1.21.4 {
 import net.minecraft.core.component.DataComponents;
 //?}
+import io.github.suel_ki.uei.config.Config;
 import net.minecraft.core.registries.Registries;
 //? if 1.21.1 {
 //import net.minecraft.world.item.EnchantedBookItem;
@@ -113,6 +128,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 //?}
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,7 +197,7 @@ public class EnchantmentDataFactory {
             if (!targetEnchantment.isBound()) continue;
             Enchantment enchantment = targetEnchantment.value();
 
-            List<Holder<Item>> applicableList = enchantment.getSupportedItems().stream().toList();
+            List<Holder<Item>> applicableList = enchantment.getSupportedItems().stream().sorted(applicableItemComparator()).toList();
 
             List<List<ItemStack>> exclusiveBooks = new ArrayList<>();
             for (Holder<Enchantment> otherEnchantment : enchantment.exclusiveSet()) {
@@ -209,6 +225,15 @@ public class EnchantmentDataFactory {
         CACHED_RECIPES = List.copyOf(recipes);
 
         return CACHED_RECIPES;
+    }
+
+    private static Comparator<Holder<Item>> applicableItemComparator() {
+        return switch (Config.get().applicableItemSort) {
+            case NAME -> Comparator.comparing(holder -> new ItemStack(holder).getHoverName().getString(), String.CASE_INSENSITIVE_ORDER);
+            case MOD -> Comparator.comparing(holder ->
+                    holder.unwrapKey().map(key -> key.identifier().getNamespace()).orElse(""));
+            case REGISTRY -> (a, b) -> 0;
+        };
     }
 
     public static void invalidateCache() {

@@ -15,6 +15,7 @@
   "uei.category.weapon": "Weapon",
   "uei.category.wearable": "Wearable Items",
   "uei.config.apothic_compat": "Apothic Enchanting Compat",
+  "uei.config.applicable_item_sort": "Applicable Item Sort",
   "uei.config.blacklisted_enchantments": "Blacklisted Enchantments",
   "uei.config.blacklisted_mods": "Blacklisted Mods",
   "uei.config.info_order": "Info Order",
@@ -34,6 +35,7 @@
   "uei.config.show_enchanting_table": "Show Enchanting Table",
   "uei.config.show_max_level": "Show Max Level",
   "uei.config.show_rarity": "Show Rarity",
+  "uei.config.show_enchanting_power": "Show Enchanting Power",
   "uei.config.show_tradeable": "Show Tradeable",
   "uei.config.show_treasure": "Show Treasure",
   "uei.config.text_scroll_speed_multiplier": "Text Scroll Speed",
@@ -61,5 +63,6 @@
   "uei.section.exclusives": "Exclusives",
   "uei.section.info_lines": "Information Lines",
   "uei.tradeable": "Tradeable:",
+  "uei.enchanting_power": "Enchanting Power",
   "uei.treasure": "Treasure:"
 }

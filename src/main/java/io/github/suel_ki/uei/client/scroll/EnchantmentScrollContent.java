@@ -41,6 +41,7 @@ public final class EnchantmentScrollContent {
     public static final Component CURSE = label("uei.curse");
     public static final Component DISCOVERABLE = label("uei.discoverable");
     public static final Component ENCHANTING_TABLE = label("uei.enchanting_table");
+    public static final Component ENCHANTING_POWER = label("uei.enchanting_power");
     public static final Component APPLIES_TO = label("uei.applies_to");
     public static final Component EXCLUSIVE_HEADER = label("uei.exclusives");
 
@@ -177,7 +178,7 @@ public final class EnchantmentScrollContent {
         Config cfg = Config.get();
 
         for (Config.InfoField field : cfg.infoOrder) {
-            if (!isFieldVisible(cfg, field)) {
+            if (!isFieldVisible(cfg, field, recipe)) {
                 continue;
             }
 
@@ -195,14 +196,16 @@ public final class EnchantmentScrollContent {
                 case DISCOVERABLE -> drawInfoLine(g, font, x, lineY, maxX,
                         DISCOVERABLE, boolDisplay(recipe.discoverable()), -1, scissorRenderer);
                 case ENCHANTING_TABLE -> drawInfoLine(g, font, x, lineY, maxX,
-                        ENCHANTING_TABLE, boolDisplay(!recipe.treasure() && !recipe.curse()), -1, scissorRenderer);
+                        ENCHANTING_TABLE, boolDisplay(recipe.tableObtainable()), -1, scissorRenderer);
+                case ENCHANTING_POWER -> drawInfoLine(g, font, x, lineY, maxX,
+                        ENCHANTING_POWER, Component.literal(recipe.enchantingPowerRange()), -1, scissorRenderer);
             }
 
             lineY += ilh;
         }
     }
 
-    private static boolean isFieldVisible(Config cfg, Config.InfoField field) {
+    private static boolean isFieldVisible(Config cfg, Config.InfoField field, EnchantmentRecipeData recipe) {
         return switch (field) {
             case RARITY -> cfg.showRarity;
             case MAX_LEVEL -> cfg.showMaxLevel;
@@ -211,14 +214,15 @@ public final class EnchantmentScrollContent {
             case CURSE -> cfg.showCurse;
             case DISCOVERABLE -> cfg.showDiscoverable;
             case ENCHANTING_TABLE -> cfg.showEnchantingTable;
+            case ENCHANTING_POWER -> cfg.showEnchantingPower && recipe.tableObtainable();
         };
     }
 
-    private static int visibleInfoLineCount(Config cfg) {
+    private static int visibleInfoLineCount(Config cfg, EnchantmentRecipeData recipe) {
         int count = 0;
 
         for (Config.InfoField field : cfg.infoOrder) {
-            if (isFieldVisible(cfg, field)) {
+            if (isFieldVisible(cfg, field, recipe)) {
                 count++;
             }
         }
@@ -320,7 +324,7 @@ public final class EnchantmentScrollContent {
             return switch (section) {
                 case DESCRIPTION -> EnchantmentUIRenderer.DESC_TEXT_Y
                         + recipe.descriptionLines(font, descWidth).size() * (font.lineHeight + 1) + 2;
-                case INFO_LINES -> visibleInfoLineCount(Config.get()) * EnchantmentUIRenderer.INFO_LINE_HEIGHT + 2;
+                case INFO_LINES -> visibleInfoLineCount(Config.get(), recipe) * EnchantmentUIRenderer.INFO_LINE_HEIGHT + 2;
                 case APPLIES_TO -> font.lineHeight + appRows * EnchantmentUIRenderer.APPLICABLE_SLOT_SPACING + 2;
                 case EXCLUSIVES -> font.lineHeight
                         + Math.max(excRows, 0) * EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING + 2;
