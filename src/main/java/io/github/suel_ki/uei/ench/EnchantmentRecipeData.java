@@ -36,11 +36,14 @@ public record EnchantmentRecipeData(
     }
 
     public List<FormattedCharSequence> descriptionLines(Font font, int maxWidth) {
-        String descKey = enchantmentProperties.descriptionId() + ".desc";
+        String base = enchantmentProperties.descriptionId();
+        String descKey = base + ".desc";
         Component description;
 
         if (I18n.exists(descKey)) {
             description = Component.translatable(descKey).withStyle(ChatFormatting.BLACK);
+        } else if (I18n.exists(base + ".description")) {
+            description = Component.translatable(base + ".description").withStyle(ChatFormatting.BLACK);
         } else {
             description = Component.translatable("uei.no_description").withStyle(ChatFormatting.BLACK);
         }
@@ -172,12 +175,16 @@ public record EnchantmentRecipeData(
         //? if <26.2 {
         /*if (I18n.exists(descKey)) {
             description = Component.translatable(descKey).withStyle(ChatFormatting.BLACK);
+        } else if (I18n.exists(key + ".description")) {
+            description = Component.translatable(key + ".description").withStyle(ChatFormatting.BLACK);
         } else {
             description = Component.translatable("uei.no_description").withStyle(ChatFormatting.BLACK);
         }
         *///?} else {
         if (Language.getInstance().has(descKey)) {
             description = Component.translatable(descKey).withStyle(ChatFormatting.BLACK);
+        } else if (Language.getInstance().has(key + ".description")) {
+            description = Component.translatable(key + ".description").withStyle(ChatFormatting.BLACK);
         } else {
             description = Component.translatable("uei.no_description").withStyle(ChatFormatting.BLACK);
         }
