@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Consumer;
@@ -156,6 +157,7 @@ public class ConfigScreen extends Screen {
             final boolean isBool;
             final boolean isColor;
             final boolean isList;
+            final boolean editableList;
 
             String currentValStr;
             final String initialValStr;
@@ -180,6 +182,9 @@ public class ConfigScreen extends Screen {
 
                 this.isBool = field.getType() == boolean.class;
                 this.isList = List.class.isAssignableFrom(field.getType());
+                this.editableList = isList
+                        && field.getGenericType() instanceof ParameterizedType parameterized
+                        && parameterized.getActualTypeArguments()[0] == String.class;
                 this.isColor = !isBool && !isList && spec != null && spec.isColor();
                 this.font = font;
                 this.label = Component.translatable(this.translationKey).withStyle(ChatFormatting.WHITE);
@@ -214,7 +219,7 @@ public class ConfigScreen extends Screen {
 
                 if (isList) {
                     this.valueWidget = Button.builder(Component.literal("Edit..."), btn -> {
-                        Minecraft.getInstance().setScreenAndShow(new ListEditScreen(parentScreen, this.label, this.currentList, newList -> {
+                        Minecraft.getInstance().setScreenAndShow(new ListEditScreen(parentScreen, this.label, this.currentList, this.editableList, newList -> {
                             this.currentList = new ArrayList<>(newList);
 
                             try {
@@ -431,16 +436,19 @@ public class ConfigScreen extends Screen {
 
         private final Map<Config.InfoField, Boolean> toggledStates = new HashMap<>();
 
-        public ListEditScreen(Screen parent, Component title, List<Object> list, Consumer<List<Object>> onSave) {
+        private final boolean editableEntries;
+
+        public ListEditScreen(Screen parent, Component title, List<Object> list, boolean editableEntries, Consumer<List<Object>> onSave) {
             super(Component.literal("Edit: ").append(title));
             this.parent = parent;
             this.currentList = new ArrayList<>(list);
+            this.editableEntries = editableEntries;
             this.onSave = onSave;
         }
 
         @Override
         protected void init() {
-            int listY = 33;
+            int listY = this.editableEntries ? 50 : 33;
             int listBottom = this.height - 35;
             //? if <=1.20.1 {
             //this.listWidget = new OrderList(this.minecraft, this.width, this.height, listY, listBottom, 30);
@@ -449,6 +457,20 @@ public class ConfigScreen extends Screen {
             //?}
             this.addRenderableWidget(this.listWidget);
             this.listWidget.updateEntries();
+
+            if (this.editableEntries) {
+                EditBox input = new EditBox(this.font, this.width / 2 - 155, 24, 240, 20, Component.literal("ID"));
+                this.addRenderableWidget(input);
+
+                this.addRenderableWidget(Button.builder(Component.literal("+"), btn -> {
+                    String value = input.getValue().trim();
+                    if (!value.isEmpty() && !this.currentList.contains(value)) {
+                        this.currentList.add(value);
+                        this.listWidget.updateEntries();
+                        input.setValue("");
+                    }
+                }).bounds(this.width / 2 + 90, 24, 65, 20).build());
+            }
 
             int buttonY = this.height - 26;
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, btn -> this.minecraft.setScreenAndShow(this.parent))
@@ -548,6 +570,7 @@ public class ConfigScreen extends Screen {
             private final Button upBtn;
             private final Button downBtn;
             private Checkbox visibilityCheckbox;
+            private final Button removeBtn;
 
             public OrderEntry(int index) {
                 this.index = index;
@@ -584,6 +607,13 @@ public class ConfigScreen extends Screen {
                     listWidget.updateEntries();
                 }).bounds(0, 0, 24, 20).build();
                 this.downBtn.active = index < currentList.size() - 1;
+
+                this.removeBtn = this.item instanceof String
+                        ? Button.builder(Component.literal("\u2715"), btn -> {
+                            currentList.remove(this.index);
+                            listWidget.updateEntries();
+                        }).bounds(0, 0, 24, 20).build()
+                        : null;
             }
 
             private Component getLocalizedName(Object item) {
@@ -630,18 +660,28 @@ public class ConfigScreen extends Screen {
                 int textY = y + (itemHeight - minecraft.font.lineHeight) / 2;
                 graphics.text(minecraft.font, displayName, currentX, textY, 0xFFFFFFFF);
 
-                this.upBtn.setX(x + width - 50);
-                this.upBtn.setY(y + (itemHeight - 20) / 2);
+                int controlsRight = x + width - 25;
+                int controlsY = y + (itemHeight - 20) / 2;
 
-                this.downBtn.setX(x + width - 25);
-                this.downBtn.setY(y + (itemHeight - 20) / 2);
+                this.downBtn.setX(controlsRight);
+                this.downBtn.setY(controlsY);
+
+                this.upBtn.setX(controlsRight - 25);
+                this.upBtn.setY(controlsY);
+
+                if (this.removeBtn != null) {
+                    this.removeBtn.setX(controlsRight - 50);
+                    this.removeBtn.setY(controlsY);
+                }
 
                 //? if >=26 {
                 this.upBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 this.downBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                if (this.removeBtn != null) this.removeBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
                 //?} else {
                 /*this.upBtn.render(graphics, mouseX, mouseY, partialTick);
                 this.downBtn.render(graphics, mouseX, mouseY, partialTick);
+                if (this.removeBtn != null) this.removeBtn.render(graphics, mouseX, mouseY, partialTick);
                 *///?}
             }
 
@@ -649,6 +689,7 @@ public class ConfigScreen extends Screen {
             public @NotNull List<? extends GuiEventListener> children() {
                 List<GuiEventListener> list = new ArrayList<>(List.of(this.upBtn, this.downBtn));
                 if (this.visibilityCheckbox != null) list.add(this.visibilityCheckbox);
+                if (this.removeBtn != null) list.add(this.removeBtn);
                 return list;
             }
 
@@ -656,6 +697,7 @@ public class ConfigScreen extends Screen {
             public @NotNull List<? extends NarratableEntry> narratables() {
                 List<NarratableEntry> list = new ArrayList<>(List.of(this.upBtn, this.downBtn));
                 if (this.visibilityCheckbox != null) list.add(this.visibilityCheckbox);
+                if (this.removeBtn != null) list.add(this.removeBtn);
                 return list;
             }
         }

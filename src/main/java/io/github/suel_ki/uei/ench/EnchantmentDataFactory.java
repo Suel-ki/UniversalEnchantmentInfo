@@ -24,7 +24,9 @@ public class EnchantmentDataFactory {
             return CACHED_RECIPES;
         }
 
-        List<Enchantment> allEnchantments = BuiltInRegistries.ENCHANTMENT.stream().toList();
+        List<Enchantment> allEnchantments = BuiltInRegistries.ENCHANTMENT.stream()
+                .filter(enchantment -> !EnchantmentBlacklist.isBlacklisted(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)))
+                .toList();
 
         List<ItemStack> validStacks = BuiltInRegistries.ITEM.stream()
                 .map(Item::getDefaultInstance)
@@ -149,6 +151,10 @@ public class EnchantmentDataFactory {
 
         List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.listElements().toList();
         //?}
+
+        allEnchantments = allEnchantments.stream()
+                .filter(holder -> !EnchantmentBlacklist.isBlacklisted(holder.key().identifier()))
+                .toList();
 
         Map<Enchantment, List<ItemStack>> allLevelBooksCache = new HashMap<>(allEnchantments.size());
         for (Holder.Reference<Enchantment> e : allEnchantments) {

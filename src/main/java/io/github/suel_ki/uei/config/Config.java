@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
@@ -62,13 +63,14 @@ public class Config {
     public boolean apothicCompat = true;
 
 *///?}
-//? if 1.21.8 {
-    /*@ConfigSpec(min = 1, max = Integer.MAX_VALUE, impactsCache = true)
-    public int maxApplicableItems = 100;
-
-*///?}
     @ConfigSpec(impactsCache = true)
     public boolean lookupEnchantmentsByItem = true;
+
+    @ConfigSpec(impactsCache = true)
+    public List<String> blacklistedMods = new ArrayList<>();
+
+    @ConfigSpec(impactsCache = true)
+    public List<String> blacklistedEnchantments = new ArrayList<>();
 
     @ConfigSpec
     public boolean useTextForBooleans = false;
