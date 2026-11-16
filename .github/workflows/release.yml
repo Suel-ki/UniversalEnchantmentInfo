@@ -1,111 +1,154 @@
-name: Release
+name: release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+
+    env:
+      MOD_IS_RELEASE: true
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Detect platform from tag
-        id: config
+      - name: Resolve tag
+        id: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Read from the tagged code, not the default branch
-          git checkout "${{ github.ref_name }}"
+          read -r VERSION CHANNEL_TAG < <(python3 -c '
+          import tomllib
 
-          MC=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
-          JAVA=$(grep '^java_version=' gradle.properties | cut -d= -f2)
-          MC_MAJOR=$(echo "$MC" | cut -d. -f1)
-          MC_MINOR=$(echo "$MC" | cut -d. -f2)
+          with open("stonecutter.properties.toml", "rb") as f:
+              mod = tomllib.load(f).get("mod", {})
 
-          echo "mc_version=$MC" >> "$GITHUB_OUTPUT"
-          echo "java_version=$JAVA" >> "$GITHUB_OUTPUT"
+          print(mod.get("version", ""), mod.get("channel_tag", ""))
+          ')
+          EXPECTED="${VERSION}${CHANNEL_TAG}"
 
-          if [ "$MC_MAJOR" -gt 1 ] || [ "$MC_MINOR" -ge 21 ]; then
-            echo "loader=neoforge" >> "$GITHUB_OUTPUT"
-          else
-            echo "loader=forge" >> "$GITHUB_OUTPUT"
+          if [[ -z "$EXPECTED" ]]; then
+            echo "::error::Could not read [mod].version from stonecutter.properties.toml."
+            exit 1
           fi
 
-      - name: Set up JDK
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="$EXPECTED"
+            echo "Manual run: using tag '$TAG' from stonecutter.properties.toml."
+          else
+            TAG="${GITHUB_REF_NAME#v}"
+
+            echo "Validating tag '$TAG' against version '$EXPECTED'..."
+            if [[ "$TAG" != "$EXPECTED" ]]; then
+              echo "::error::Tag '$TAG' does not match version '$EXPECTED' in stonecutter.properties.toml."
+
+              if gh release view "$GITHUB_REF_NAME" &>/dev/null; then
+                echo "Deleting GitHub release for $GITHUB_REF_NAME..."
+                gh release delete "$GITHUB_REF_NAME" -y
+              fi
+
+              git push origin ":refs/tags/$GITHUB_REF_NAME"
+              exit 1
+            fi
+            echo "✓ Tag matches version."
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, reusing it."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "$TAG"
+          git push origin "$TAG"
+
+      - name: Prepare git-cliff
+        run: |
+          REPO_URL="https://github.com/${{ github.repository }}"
+          sed -i "s|%%%repo_url%%%|${REPO_URL}|g" cliff.toml
+
+
+      - name: Generate the release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          args: --latest --strip header --output docs/CHANGELOG_LATEST.md
+          version: 'v2.13.1'
+
+      - name: Update the changelog
+        run: |
+          python3 - <<'PY'
+          import pathlib
+
+          section = pathlib.Path("docs/CHANGELOG_LATEST.md").read_text(encoding="utf-8").strip()
+          if section.startswith("---"):
+              section = section[3:].lstrip()
+
+          path = pathlib.Path("docs/CHANGELOG.md")
+          text = path.read_text(encoding="utf-8")
+
+          if section in text:
+              print("changelog already contains this release")
+              raise SystemExit(0)
+
+          marker = "\n---\n"
+          index = text.find(marker)
+          head = text[: index + len(marker)] if index >= 0 else text.rstrip() + marker
+          body = text[index + len(marker) :].lstrip() if index >= 0 else ""
+
+          path.write_text(head + section + "\n\n---\n" + body, encoding="utf-8", newline="\n")
+          PY
+
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: "${{ steps.config.outputs.java_version }}"
-          distribution: temurin
+          java-version: 25
+          distribution: 'microsoft'
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: gradle-${{ runner.os }}-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Build
-        run: chmod +x gradlew && ./gradlew build
-
-      - name: Upload jars to release
+      - name: Build and publish
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUB_GITHUB_ENABLE: ${{ vars.PUB_GITHUB_ENABLE }}
+          PUB_DRY_RUN: ${{ vars.PUB_DRY_RUN }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+          PUB_MODS_ENABLE: ${{ vars.PUB_MODS_ENABLE }}
+          PUB_MODRINTH_STAGING: ${{ vars.PUB_MODRINTH_STAGING }}
+          PUB_MODRINTH_PROJECT_ID: ${{ vars.PUB_MODRINTH_PROJECT_ID }}
+          PUB_CURSEFORGE_PROJECT_ID: ${{ vars.PUB_CURSEFORGE_PROJECT_ID }}
+          PUB_MODRINTH_TOKEN: ${{ secrets.MODRINTH_API_KEY }}
+          PUB_CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_API_KEY }}
+        run: ./gradlew publishMods --no-daemon --stacktrace --console=plain
+
+      - name: Commit the changelog
         run: |
-          gh release upload "${{ github.ref_name }}" \
-            fabric/build/libs/*-fabric-[0-9]*[0-9].jar \
-            ${{ steps.config.outputs.loader }}/build/libs/*-${{ steps.config.outputs.loader }}-[0-9]*[0-9].jar
-
-      - name: Save changelog for publish
-        run: |
-          cat << 'EOF' > docs/CHANGELOGS.md
-          ${{ github.event.release.body }}
-          EOF
-
-      - name: Publish to CurseForge & Modrinth
-        run: ./gradlew publish
-        env:
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
-
-      - name: Update changelog
-        run: |
-          TAG="${{ github.ref_name }}"
-          MC="${{ steps.config.outputs.mc_version }}"
-          BRANCH="$MC"
-
-          git fetch origin "$BRANCH"
-          git checkout -f "$BRANCH"
-
-          mkdir -p docs
-          CHANGELOG_FILE="docs/CHANGELOGS.md"
-          echo "" >> "$CHANGELOG_FILE"
-          cat << 'EOF' >> "$CHANGELOG_FILE"
-          ${{ github.event.release.body }}
-          EOF
-
+          BRANCH="${{ github.event.repository.default_branch }}"
+          cp docs/CHANGELOG.md "$RUNNER_TEMP/CHANGELOG.md"
+          git checkout -- docs/CHANGELOG.md
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          PR_BRANCH="changelog-update-$BRANCH"
-          git checkout -B "$PR_BRANCH"
-          git add "$CHANGELOG_FILE"
+          git fetch origin "$BRANCH"
+          git checkout -B "$BRANCH" "origin/$BRANCH"
+          cp "$RUNNER_TEMP/CHANGELOG.md" docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
           git diff --staged --quiet && exit 0
-          git commit -m "chore: update changelog for $TAG"
-          git push -f origin "$PR_BRANCH"
-
-          gh pr create \
-            --title "docs: update changelog for $TAG" \
-            --body "Automated changelog update for \`$TAG\`." \
-            --base "$BRANCH" \
-            --head "$PR_BRANCH" \
-            || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git commit -m "docs: update changelog for ${GITHUB_REF_NAME}"
+          git push origin "$BRANCH"

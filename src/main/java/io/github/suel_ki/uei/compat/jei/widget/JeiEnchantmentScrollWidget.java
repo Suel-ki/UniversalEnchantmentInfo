@@ -1,0 +1,263 @@
+//? if jei {
+package io.github.suel_ki.uei.compat.jei.widget;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
+import io.github.suel_ki.uei.client.render.ScissorHelper;
+import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
+import io.github.suel_ki.uei.client.scroll.ScrollContext;
+import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.inputs.IJeiInputHandler;
+import mezz.jei.api.gui.inputs.IJeiUserInput;
+import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
+import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
+import mezz.jei.common.Internal;
+import mezz.jei.common.util.ImmutableRect2i;
+//? if <1.21.4 {
+//import mezz.jei.common.util.MathUtil;
+//?}
+//? if 1.20.1 {
+//import mezz.jei.api.gui.builder.ITooltipBuilder;
+//?}
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Optional;
+
+public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInputHandler {
+    private final EnchantmentRecipeData recipe;
+    private final List<FormattedCharSequence> descLines;
+    private final List<List<ItemStack>> exclusiveBooks;
+    private final List<IRecipeSlotDrawable> exclusiveSlots;
+    private final List<IRecipeSlotDrawable> applicableSlots;
+    private final int exclusiveSlotsPerRow;
+    private final int applicableSlotCount;
+    private final int applicableSlotsPerRow;
+
+    private final ImmutableRect2i area;
+    private final ImmutableRect2i contentsArea;
+
+    private final ScrollContext scrollContext;
+
+    private EnchantmentScrollContent.LayoutMetrics layoutMetrics;
+
+    public JeiEnchantmentScrollWidget(EnchantmentRecipeData recipe, int x, int y, int width, int height,
+                                      List<IRecipeSlotDrawable> exclusiveSlots,
+                                      List<IRecipeSlotDrawable> applicableSlots,
+                                      int applicableSlotCount, int applicableSlotsPerRow) {
+        this.recipe = recipe;
+        this.descLines = recipe.descriptionLines(Minecraft.getInstance().font);
+        this.exclusiveBooks = recipe.exclusiveStacks();
+        this.exclusiveSlots = exclusiveSlots;
+        this.applicableSlots = applicableSlots;
+        this.area = new ImmutableRect2i(x, y, width, height);
+
+        this.contentsArea = new ImmutableRect2i(0, 0, width - EnchantmentScrollContent.TRACK_WIDTH, height);
+
+        this.exclusiveSlotsPerRow = EnchantmentScrollContent.exclusiveSlotsPerRow(contentsArea.width(), 0);
+        this.applicableSlotCount = applicableSlotCount;
+        this.applicableSlotsPerRow = applicableSlotsPerRow;
+
+        updateLayoutMetrics();
+
+        this.scrollContext = new ScrollContext(0, 0, width, height, this::maxScroll);
+    }
+
+    private void updateLayoutMetrics() {
+        int excRows = EnchantmentScrollContent.calculateRows(exclusiveSlots.size(), exclusiveSlotsPerRow);
+        this.layoutMetrics = new EnchantmentScrollContent.LayoutMetrics(
+                this.recipe, Minecraft.getInstance().font, applicableRows(), excRows
+        );
+    }
+
+    private int applicableRows() {
+        return EnchantmentScrollContent.calculateRows(applicableSlotCount, applicableSlotsPerRow);
+    }
+
+    private int maxScroll() {
+        return layoutMetrics.maxScroll(contentsArea.height());
+    }
+
+    @Override
+    public void drawWidget(GuiGraphicsExtractor g, double mouseX, double mouseY) {
+        scrollContext.tick();
+
+        Minecraft mc = Minecraft.getInstance();
+        Font font = mc.font;
+        int pad = EnchantmentUIRenderer.PADDING;
+        int contentWidth = scrollContext.contentWidth();
+
+        float totalScroll = scrollContext.scrollAmount();
+        double adjY = mouseY + totalScroll;
+
+        //? if <1.21.4 {
+        /*var poseStack = g.pose();
+        ScreenRectangle scissorBounds = MathUtil.transform(contentsArea, poseStack.last().pose());
+        try (var ignored = ScissorHelper.scissorScreen(g, scissorBounds.left(), scissorBounds.top(), scissorBounds.right(), scissorBounds.bottom())) {
+        *///?} else {
+        var poseStack = g.pose();
+        try (var ignored = ScissorHelper.scissor(g, contentsArea.x(), contentsArea.y(), contentsArea.width(), contentsArea.height())) {
+        //?}
+
+            //? if <1.21.8 {
+            /*poseStack.pushPose();
+            poseStack.translate(0, -scrollContext.scrollAmount(), 0);
+            *///?} else {
+            poseStack.pushMatrix();
+            poseStack.translate(0, -scrollContext.scrollAmount());
+            //?}
+
+            if (layoutMetrics.descY != -1) {
+                EnchantmentScrollContent.drawDescription(g, font, descLines, 0, layoutMetrics.descY, pad);
+            }
+
+            if (layoutMetrics.infoY != -1) {
+                EnchantmentScrollContent.drawAttributes(g, font, recipe, pad, layoutMetrics.infoY,
+                        contentWidth - pad, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+            }
+
+            // applicable items
+            if (layoutMetrics.appliesToY != -1) {
+                EnchantmentScrollContent.renderScrollingString(g, font, EnchantmentScrollContent.APPLIES_TO,
+                        pad, layoutMetrics.appliesToY, contentWidth, layoutMetrics.appliesToY + font.lineHeight, -1,
+                        EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+
+                int aiy = layoutMetrics.appliesToY + font.lineHeight + 1;
+                int aspacing = EnchantmentUIRenderer.APPLICABLE_SLOT_SPACING;
+                for (int i = 0; i < applicableSlots.size(); i++) {
+                    int x = EnchantmentScrollContent.gridX(i, applicableSlotsPerRow, pad + 1, aspacing);
+                    int y = EnchantmentScrollContent.gridY(i, applicableSlotsPerRow, aiy + 1, aspacing);
+                    IRecipeSlotDrawable slot = applicableSlots.get(i);
+                    slot.setPosition(x, y);
+                    drawSlot(slot, g, mouseX, adjY);
+                }
+            }
+
+            if (layoutMetrics.exclusivesY != -1) {
+                int chy = layoutMetrics.exclusivesY;
+                // exclusive items
+                if (!exclusiveBooks.isEmpty()) {
+                    EnchantmentScrollContent.drawExclusiveHeader(g, font, pad, chy,
+                            contentWidth, EnchantmentScrollContent.EXCLUSIVE_HEADER, exclusiveBooks.size(), EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+
+                    int ciy = chy + font.lineHeight + 1;
+                    int spacing = EnchantmentUIRenderer.EXCLUSIVE_SLOT_SPACING;
+                    for (int i = 0; i < exclusiveSlots.size(); i++) {
+                        int x = EnchantmentScrollContent.gridX(i, exclusiveSlotsPerRow, pad + 1, spacing);
+                        int y = EnchantmentScrollContent.gridY(i, exclusiveSlotsPerRow, ciy + 1, spacing);
+                        IRecipeSlotDrawable slot = exclusiveSlots.get(i);
+                        slot.setPosition(x, y);
+                        drawSlot(slot, g, mouseX, adjY);
+                    }
+                } else {
+                    EnchantmentScrollContent.renderScrollingString(g, font,
+                            EnchantmentScrollContent.NO_EXCLUSIVES,
+                            pad, chy, contentWidth, chy + font.lineHeight, -1, EnchantmentScrollContent.UNIVERSAL_SCISSOR);
+                }
+            }
+
+            //? if <1.21.8 {
+            //poseStack.popPose();
+            //?} else {
+            poseStack.popMatrix();
+            //?}
+        }
+
+        scrollContext.drawScrollbar(g);
+    }
+
+    //? if 1.20.1 {
+    /*@Override
+    public void getTooltip(ITooltipBuilder tooltip, double mouseX, double mouseY) {
+        getSlotUnderMouse(mouseX, mouseY).ifPresent(
+                slotUnderMouse -> slotUnderMouse.slot().getTooltip(tooltip)
+        );
+    }
+    *///?}
+
+    @Override
+    public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
+        float totalScroll = scrollContext.scrollAmount();
+        double adjY = mouseY + totalScroll;
+
+        int yOffset = area.y() - Math.round(totalScroll);
+
+        for (IRecipeSlotDrawable slot : exclusiveSlots) {
+            if (slot.isMouseOver(mouseX, adjY)) {
+                return Optional.of(new RecipeSlotUnderMouse(slot,
+                        area.x(), yOffset));
+            }
+        }
+
+        for (IRecipeSlotDrawable slot : applicableSlots) {
+            if (slot.isMouseOver(mouseX, adjY)) {
+                return Optional.of(new RecipeSlotUnderMouse(slot,
+                        area.x(), yOffset));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean handleInput(double mouseX, double mouseY, IJeiUserInput userInput) {
+        if (!userInput.is(Internal.getKeyMappings().getLeftClick())) {
+            return false;
+        }
+        scrollContext.resetDrag();
+        if (!scrollContext.isOnTrack(mouseX, mouseY) || maxScroll() == 0) {
+            return false;
+        }
+        if (userInput.isSimulate()) {
+            return scrollContext.mouseClicked(mouseX, mouseY, InputConstants.MOUSE_BUTTON_LEFT);
+        }
+        return false;
+    }
+
+    //? if <1.21.1 {
+    /*@Override
+    public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollDeltaY) {
+        return scrollContext.mouseScrolled(scrollDeltaY);
+    }
+    *///?} else {
+    @Override
+    public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollDeltaX, double scrollDeltaY) {
+        return scrollContext.mouseScrolled(scrollDeltaY);
+    }
+    //?}
+
+    @Override
+    public boolean handleMouseDragged(double mouseX, double mouseY, InputConstants.Key key, double dx, double dy) {
+        if (key.getValue() == InputConstants.MOUSE_BUTTON_LEFT) {
+            return scrollContext.mouseDragged(mouseX, mouseY, InputConstants.MOUSE_BUTTON_LEFT);
+        }
+        return false;
+    }
+
+    @Override
+    public @NotNull ScreenPosition getPosition() {
+        return area.getScreenPosition();
+    }
+
+    @Override
+    public @NotNull ScreenRectangle getArea() {
+        return area.toScreenRectangle();
+    }
+
+    private static void drawSlot(IRecipeSlotDrawable slot, GuiGraphicsExtractor g, double mouseX, double mouseY) {
+        //? if <1.21.1 || (>=1.21.4 <1.21.11) {
+        //slot.draw(g);
+        //?} else {
+        slot.draw(g, slot.isMouseOver(mouseX, mouseY));
+        //?}
+    }
+}
+//?}

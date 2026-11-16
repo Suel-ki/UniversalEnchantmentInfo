@@ -1,0 +1,130 @@
+//? if rei {
+package io.github.suel_ki.uei.compat.rei;
+
+import io.github.suel_ki.uei.Uei;
+import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
+import io.github.suel_ki.uei.config.Config;
+import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+//? if >=1.21.4 {
+import me.shedaniel.rei.api.common.display.DisplaySerializer;
+//?}
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+//? if >=1.21.4 {
+import org.jetbrains.annotations.Nullable;
+//?}
+
+import java.util.List;
+//? if >=1.21.4 {
+import java.util.Optional;
+//?}
+
+public class EnchantmentDisplay implements Display {
+    private final EnchantmentRecipeData recipe;
+    private final List<EntryIngredient> inputs;
+    private final List<EntryIngredient> outputs;
+    private final List<EntryIngredient> batchedApplicableIngredients;
+    private final List<EntryIngredient> exclusiveIngredients;
+    private final EntryIngredient bookIngredient;
+    private final Identifier id;
+
+    public EnchantmentDisplay(EnchantmentRecipeData recipe) {
+        this.recipe = recipe;
+        //? if >=1.21.4 <1.21.11 {
+        //this.bookIngredient = EntryIngredients.of(recipe.enchantedBook());
+        //?} else {
+        this.bookIngredient = EntryIngredients.ofItemStacks(recipe.allLevelBooks());
+        //?}
+
+        this.exclusiveIngredients = recipe
+                .exclusiveStacks().stream()
+                .map(EntryIngredients::ofItemStacks)
+                .toList();
+
+        List<List<ItemStack>> batches = EnchantmentScrollContent.batchApplicableItems(recipe);
+        this.batchedApplicableIngredients = batches.stream()
+                .map(EntryIngredients::ofItemStacks)
+                .toList();
+
+        //? if <=1.20.1 {
+        //List<ItemStack> applicableStacks = recipe.applicableStacks();
+        //?} else {
+        List<ItemStack> applicableStacks = recipe.applicableItems().stream()
+                .map(holder -> new ItemStack(holder.value()))
+                .toList();
+        //?}
+
+        List<ItemStack> exclusiveStacks = recipe.exclusiveStacks().stream()
+                .flatMap(List::stream)
+                .toList();
+
+        if (Config.get().lookupEnchantmentsByItem) {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks),
+                    EntryIngredients.ofItemStacks(applicableStacks)
+            );
+        } else {
+            this.inputs = List.of(
+                    EntryIngredients.ofItemStacks(exclusiveStacks)
+            );
+        }
+        //? if <1.21.1 {
+        //this.outputs = List.of(bookIngredient);
+        //?} else {
+        this.outputs = List.of(EntryIngredients.ofItemStacks(recipe.allLevelBooks()));
+        //?}
+        this.id = recipe.id();
+    }
+
+    public EnchantmentRecipeData getRecipeData() {
+        return recipe;
+    }
+
+    public EntryIngredient getBookIngredient() {
+        return bookIngredient;
+    }
+
+    public List<EntryIngredient> getBatchedApplicableIngredients() {
+        return batchedApplicableIngredients;
+    }
+
+    public List<EntryIngredient> getExclusiveIngredients() {
+        return exclusiveIngredients;
+    }
+
+    public int getBatchCount() {
+        return batchedApplicableIngredients.size();
+    }
+
+    @Override
+    public List<EntryIngredient> getInputEntries() {
+        return inputs;
+    }
+
+    @Override
+    public List<EntryIngredient> getOutputEntries() {
+        return outputs;
+    }
+
+    @Override
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return ReiEnchantmentCategory.ID;
+    }
+
+    //? if >=1.21.4 {
+    @Override
+    public Optional<Identifier> getDisplayLocation() {
+        return Optional.ofNullable(id);
+    }
+
+    @Override
+    public @Nullable DisplaySerializer<? extends Display> getSerializer() {
+        return null;
+    }
+    //?}
+}
+//?}
