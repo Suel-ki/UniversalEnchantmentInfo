@@ -25,6 +25,8 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public final class EnchantmentScrollContent {
 
@@ -203,6 +205,67 @@ public final class EnchantmentScrollContent {
 
             lineY += ilh;
         }
+    }
+
+    public static Component infoTooltip(Config.InfoField field) {
+        return Component.translatable("uei." + field.name().toLowerCase(Locale.ROOT) + ".tooltip");
+    }
+
+    public static void drawInfoTooltip(GuiGraphicsExtractor g, Font font, Config.InfoField field,
+                                        int mouseX, int mouseY, int maxWidth) {
+        List<Component> lines = infoTooltipLines(field, font, maxWidth);
+        //? if >=1.21.8 {
+        g.setTooltipForNextFrame(font, lines, Optional.empty(), mouseX, mouseY);
+        //?} else {
+        //g.renderComponentTooltip(font, lines, mouseX, mouseY);
+        //?}
+    }
+
+    public static List<Component> infoTooltipLines(Config.InfoField field, Font font, int maxWidth) {
+        Component text = infoTooltip(field);
+        List<FormattedCharSequence> parts = font.split(text, Math.max(40, maxWidth));
+        List<Component> lines = new ArrayList<>(parts.size());
+
+        for (FormattedCharSequence part : parts) {
+            lines.add(Component.literal(flatten(part)));
+        }
+
+        return lines;
+    }
+
+    private static String flatten(FormattedCharSequence sequence) {
+        StringBuilder builder = new StringBuilder();
+        sequence.accept((index, style, codePoint) -> {
+            builder.appendCodePoint(codePoint);
+            return true;
+        });
+        return builder.toString();
+    }
+
+    public static Config.InfoField infoFieldAt(EnchantmentRecipeData recipe, Font font, int x, int y, int maxX,
+                                              double mouseX, double mouseY, double scroll,
+                                              int viewportTop, int viewportBottom) {
+        if (mouseY < viewportTop || mouseY >= viewportBottom) {
+            return null;
+        }
+
+        Config cfg = Config.get();
+        int lineY = y;
+        double contentY = mouseY + scroll;
+
+        for (Config.InfoField field : cfg.infoOrder) {
+            if (!isFieldVisible(cfg, field, recipe)) {
+                continue;
+            }
+
+            if (mouseX >= x && mouseX <= maxX && contentY >= lineY && contentY < lineY + font.lineHeight) {
+                return field;
+            }
+
+            lineY += EnchantmentUIRenderer.INFO_LINE_HEIGHT;
+        }
+
+        return null;
     }
 
     private static boolean isFieldVisible(Config cfg, Config.InfoField field, EnchantmentRecipeData recipe) {

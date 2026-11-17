@@ -10,6 +10,7 @@ import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.client.scroll.ScrollContext;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -156,6 +157,16 @@ public class RrvEnchantmentScrollWidget implements GuiEventListener, Renderable,
         scrollContext.drawScrollbar(g);
 
         g.pose().popMatrix();
+
+        if (Config.get().showInfoTooltips && layoutMetrics.infoY != -1) {
+            Config.InfoField hovered = EnchantmentScrollContent.infoFieldAt(recipe, font,
+                    x + pad, y + layoutMetrics.infoY, right - pad,
+                    toLocalX(mouseX), toLocalY(mouseY), scroll, y, y + height);
+
+            if (hovered != null) {
+                EnchantmentScrollContent.drawInfoTooltip(g, font, hovered, mouseX, mouseY, 200);
+            }
+        }
     }
 
     @Override

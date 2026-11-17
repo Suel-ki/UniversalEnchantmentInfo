@@ -1,6 +1,7 @@
 //? if emi {
 package io.github.suel_ki.uei.compat.emi.widget;
 
+import dev.emi.emi.api.render.EmiTooltipComponents;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
@@ -8,10 +9,12 @@ import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.client.scroll.ScrollContext;
 import io.github.suel_ki.uei.compat.emi.compat.IMouseEvents;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
@@ -57,6 +60,24 @@ public class EmiEnchantmentScrollWidget extends Widget implements IMouseEvents {
     @Override
     public Bounds getBounds() {
         return bounds;
+    }
+
+    @Override
+    public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
+        if (!Config.get().showInfoTooltips || layoutMetrics.infoY == -1) {
+            return List.of();
+        }
+
+        Font font = Minecraft.getInstance().font;
+        int pad = EnchantmentUIRenderer.PADDING;
+        Config.InfoField hovered = EnchantmentScrollContent.infoFieldAt(recipe, font,
+                bounds.x() + pad, bounds.y() + layoutMetrics.infoY,
+                bounds.x() + bounds.width() - pad, mouseX, mouseY, getScrollAmount(),
+                bounds.y(), bounds.y() + bounds.height());
+
+        return hovered == null
+                ? List.of()
+                : List.of(EmiTooltipComponents.of(EnchantmentScrollContent.infoTooltip(hovered)));
     }
 
     private int applicableRows() {

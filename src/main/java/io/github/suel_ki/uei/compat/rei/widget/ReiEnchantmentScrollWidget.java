@@ -4,6 +4,7 @@ package io.github.suel_ki.uei.compat.rei.widget;
 import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.client.scroll.ScrollContext;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import me.shedaniel.math.Rectangle;
 //? if >=26 {
@@ -12,6 +13,7 @@ import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 //import net.minecraft.client.gui.GuiGraphicsExtractor;
 //?}
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.Minecraft;
@@ -210,6 +212,17 @@ public class ReiEnchantmentScrollWidget extends WidgetWithBounds {
         }
 
         scrollContext.drawScrollbar(g);
+
+        if (Config.get().showInfoTooltips && layoutMetrics.infoY != -1) {
+            Rectangle inner = getScissorBounds();
+            Config.InfoField hovered = EnchantmentScrollContent.infoFieldAt(recipe, font,
+                    inner.x + pad, inner.y + layoutMetrics.infoY, inner.x + inner.width - pad,
+                    mouseX, mouseY, scrollAmount(), inner.y, inner.y + inner.height);
+
+            if (hovered != null) {
+                Tooltip.create(EnchantmentScrollContent.infoTooltip(hovered)).queue();
+            }
+        }
     }
 
     //? if <1.21 {

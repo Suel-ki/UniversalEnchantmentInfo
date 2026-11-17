@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRecipeData> {
@@ -156,8 +157,10 @@ public class EnchantmentRecipeCategory implements IRecipeCategory<EnchantmentRec
                 EnchantmentUIRenderer.PANEL_HEIGHT - EnchantmentUIRenderer.LOWER_START_Y,
                 exclusives, applicables, applicables.size(), applicableSlotsPerRow
         );
-        builder.addSlottedWidget(widget, exclusives);
-        builder.addSlottedWidget(widget, applicables);
+        List<IRecipeSlotDrawable> slots = new ArrayList<>(exclusives);
+        slots.addAll(applicables);
+
+        builder.addSlottedWidget(widget, slots);
         builder.addInputHandler(widget);
     }
 }

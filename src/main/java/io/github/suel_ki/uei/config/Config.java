@@ -102,6 +102,9 @@ public class Config {
     @ConfigSpec
     public boolean showEnchantingPower = true;
 
+    @ConfigSpec
+    public boolean showInfoTooltips = true;
+
     @ConfigSpec(min = 0, max = 16777215, isColor = true)
     public int rarityColorCommon = 16777215;
 
@@ -142,32 +145,28 @@ public class Config {
     }
 
     private void sanitizeOrders() {
-        List<Section> sections = new ArrayList<>();
-        if (this.sectionOrder != null) {
-            for (Section section : this.sectionOrder) {
-                if (section != null && !sections.contains(section)) {
-                    sections.add(section);
-                }
-            }
-        }
-        if (sections.isEmpty()) {
-            sections.addAll(List.of(Section.values()));
-        }
-        this.sectionOrder = sections;
+        this.sectionOrder = completeEnumList(this.sectionOrder, Section.values());
+        this.infoOrder = completeEnumList(this.infoOrder, InfoField.values());
+    }
 
-        List<InfoField> fields = new ArrayList<>();
-        if (this.infoOrder != null) {
-            for (InfoField field : this.infoOrder) {
-                InfoField resolved = field == null ? InfoField.ENCHANTING_POWER : field;
-                if (!fields.contains(resolved)) {
-                    fields.add(resolved);
+    private static <T extends Enum<T>> List<T> completeEnumList(List<T> values, T[] all) {
+        List<T> result = new ArrayList<>(all.length);
+
+        if (values != null) {
+            for (T value : values) {
+                if (value != null && !result.contains(value)) {
+                    result.add(value);
                 }
             }
         }
-        if (fields.isEmpty()) {
-            fields.addAll(List.of(InfoField.values()));
+
+        for (T value : all) {
+            if (!result.contains(value)) {
+                result.add(value);
+            }
         }
-        this.infoOrder = fields;
+
+        return result;
     }
 
     private void validate() {

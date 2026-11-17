@@ -6,6 +6,7 @@ import io.github.suel_ki.uei.client.render.EnchantmentUIRenderer;
 import io.github.suel_ki.uei.client.render.ScissorHelper;
 import io.github.suel_ki.uei.client.scroll.EnchantmentScrollContent;
 import io.github.suel_ki.uei.client.scroll.ScrollContext;
+import io.github.suel_ki.uei.config.Config;
 import io.github.suel_ki.uei.ench.EnchantmentRecipeData;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.inputs.IJeiInputHandler;
@@ -17,9 +18,7 @@ import mezz.jei.common.util.ImmutableRect2i;
 //? if <1.21.4 {
 //import mezz.jei.common.util.MathUtil;
 //?}
-//? if 1.20.1 {
-//import mezz.jei.api.gui.builder.ITooltipBuilder;
-//?}
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -174,14 +173,22 @@ public class JeiEnchantmentScrollWidget implements ISlottedRecipeWidget, IJeiInp
         scrollContext.drawScrollbar(g);
     }
 
-    //? if 1.20.1 {
-    /*@Override
+    @Override
     public void getTooltip(ITooltipBuilder tooltip, double mouseX, double mouseY) {
-        getSlotUnderMouse(mouseX, mouseY).ifPresent(
-                slotUnderMouse -> slotUnderMouse.slot().getTooltip(tooltip)
-        );
+        if (!Config.get().showInfoTooltips || layoutMetrics.infoY == -1) {
+            return;
+        }
+
+        Font font = Minecraft.getInstance().font;
+        int pad = EnchantmentUIRenderer.PADDING;
+        Config.InfoField hovered = EnchantmentScrollContent.infoFieldAt(recipe, font,
+                pad, layoutMetrics.infoY, area.width() - pad, mouseX, mouseY,
+                scrollContext.scrollAmount(), contentsArea.y(), contentsArea.y() + contentsArea.height());
+
+        if (hovered != null) {
+            tooltip.add(EnchantmentScrollContent.infoTooltip(hovered));
+        }
     }
-    *///?}
 
     @Override
     public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
