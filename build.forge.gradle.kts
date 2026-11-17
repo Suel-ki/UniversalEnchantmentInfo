@@ -79,13 +79,13 @@ dependencies {
 	compileOnly("dev.emi:emi-xplat-mojmap:${prop("deps.emi")}:api")
 	compileOnly("dev.emi:emi-xplat-mojmap:${prop("deps.emi")}")
 	compileOnly("maven.modrinth:apotheosis:${prop("deps.apotheosis")}")
-	if (viewerSelected("jei")) runtimeOnly("mezz.jei:jei-${prop("deps.minecraft")}-forge:${prop("deps.jei")}")
+	if (viewerSelected("jei")) modRuntimeOnly("mezz.jei:jei-${prop("deps.minecraft")}-forge:${prop("deps.jei")}")
 	if (viewerSelected("rei")) {
-		runtimeOnly("me.shedaniel:RoughlyEnoughItems-forge:${prop("deps.rei")}")
-		runtimeOnly("me.shedaniel.cloth:cloth-config-forge:${prop("deps.cloth-config")}")
-		runtimeOnly("dev.architectury:architectury-forge:${prop("deps.architectury")}")
+		modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-forge:${prop("deps.rei")}")
+		modRuntimeOnly("me.shedaniel.cloth:cloth-config-forge:${prop("deps.cloth-config")}")
+		modRuntimeOnly("dev.architectury:architectury-forge:${prop("deps.architectury")}")
 	}
-	if (viewerSelected("emi")) runtimeOnly("dev.emi:emi-forge:${prop("deps.emi")}")
+	if (viewerSelected("emi")) modRuntimeOnly("dev.emi:emi-forge:${prop("deps.emi")}")
 }
 
 tasks.named("createMinecraftArtifacts") {

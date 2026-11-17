@@ -41,6 +41,12 @@ platform {
 	}
 }
 
+if (hasProp("deps.mezz-config")) {
+	dependencies {
+		modLocalRuntime("net.mezzdev.config:mezz_config-" + stonecutter.current.version + "-fabric:" + prop("deps.mezz-config"))
+	}
+}
+
 loom {
 	runs.named("client") {
 		client()
