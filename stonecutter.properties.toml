@@ -2,12 +2,12 @@
 id = "uei"
 name = "Universal Enchantment Info"
 group = "io.github.suel_ki"
-version = "1.5.0"
+version = "1.6.0"
 channel_tag = ""
 description = "A JEI/REI/EMI/RRV plugin that displays detailed enchantment information"
 authors = ["Suel_ki"]
 contributors = []
-inception_year = "2024"
+inception_year = "2026"
 license.name = "MIT"
 license.url = "https://opensource.org/licenses/MIT"
 license.dist = "repo"
