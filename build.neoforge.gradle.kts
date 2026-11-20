@@ -33,7 +33,7 @@ platform {
 		required("minecraft") { forgeLikeVersionRange = prop("deps.minecraft") }
 		required("neoforge") { forgeLikeVersionRange.set("[${prop("deps.neoforge")},)") }
 		if (hasProp("deps.jei")) optional("jei") { slug("jei") }
-		if (hasProp("deps.rei")) optional("rei") { slug("roughly-enough-items") }
+		if (hasProp("deps.rei")) optional("rei") { slug(modrinthSlug = "rei", curseforgeSlug = "roughly-enough-items") }
 		if (hasProp("deps.emi")) optional("emi") { slug("emi") }
 		if (hasProp("deps.rrv")) optional("rrv") { slug("rrv") }
 	}
