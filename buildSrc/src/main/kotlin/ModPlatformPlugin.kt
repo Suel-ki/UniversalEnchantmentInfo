@@ -153,12 +153,24 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		the<JavaPluginExtension>().sourceSets.named("main") { resources.srcDir(manifestOutputDir) }
 		tasks.named<ProcessResources>("processResources") { dependsOn(generateTask) }
+
+
 	}
 
 	private fun Project.configureProcessResources(ctx: Context) {
 		val javaVersionValue = "JAVA_${ctx.javaVersion.majorVersion}"
 		val excluded = ctx.loader.excludedResources
-			val disabledMixins = listOf("${ctx.modId}.emi.mixins.json", "${ctx.modId}.rrv.mixins.json").filter { it !in ctx.mixinConfigs }
+			val awSuffix = if (ctx.stonecutter.eval(ctx.currentMcVersion, ">=26")) "official" else "named"
+			val disabledAccessWideners = listOf("named", "official")
+				.filter { it != awSuffix || ctx.loader.id != "fabric" }
+				.map { "${ctx.modId}.$it.accesswidener" }
+
+			val disabledMixins = listOf(
+				"${ctx.modId}.mixins.json",
+				"${ctx.modId}.emi.mixins.json",
+				"${ctx.modId}.rei.mixins.json",
+				"${ctx.modId}.rrv.mixins.json"
+			).filter { it !in ctx.mixinConfigs }
 		tasks.named<ProcessResources>("processResources") {
 			dependsOn(tasks.named("stonecutterGenerate"))
 			filesMatching("*.mixins.json") {
@@ -166,6 +178,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			}
 			exclude(excluded)
 			exclude(disabledMixins)
+			exclude(disabledAccessWideners)
 		}
 	}
 
@@ -177,6 +190,10 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			if (ctx.loader is Loader.Forge && ctx.mixinConfigs.isNotEmpty()) {
 				manifest.attributes(ctx.loader.mixinConfigAttribute to ctx.mixinConfigs.joinToString(","))
 			}
+			if (ctx.loader is Loader.Forge) {
+				exclude("META-INF/MANIFEST.MF")
+			}
+
 		}
 	}
 

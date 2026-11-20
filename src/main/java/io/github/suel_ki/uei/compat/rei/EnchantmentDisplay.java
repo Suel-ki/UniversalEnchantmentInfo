@@ -32,6 +32,10 @@ public class EnchantmentDisplay implements Display {
     private final EntryIngredient bookIngredient;
     private final Identifier id;
 
+    public EnchantmentRecipeData data() {
+        return recipe;
+    }
+
     public EnchantmentDisplay(EnchantmentRecipeData recipe) {
         this.recipe = recipe;
         //? if >=1.21.4 <1.21.11 {

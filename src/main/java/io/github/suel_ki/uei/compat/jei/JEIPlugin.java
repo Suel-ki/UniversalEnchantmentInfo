@@ -8,6 +8,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -18,14 +19,31 @@ public class JEIPlugin implements IModPlugin {
 
     private static final Identifier UID = Uei.id(Uei.MOD_ID, "ench_info");
 
+    private static IJeiRuntime runtime;
+    private static EnchantmentRecipeCategory category;
+
+    public static IJeiRuntime runtime() {
+        return runtime;
+    }
+
+    public static EnchantmentRecipeCategory category() {
+        return category;
+    }
+
     @Override
     public @NotNull Identifier getPluginUid() {
         return UID;
     }
 
     @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        JEIPlugin.runtime = runtime;
+    }
+
+    @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
-        registration.addRecipeCategories(new EnchantmentRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        category = new EnchantmentRecipeCategory(registration.getJeiHelpers().getGuiHelper());
+        registration.addRecipeCategories(category);
     }
 
     @Override

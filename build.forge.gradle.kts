@@ -38,6 +38,12 @@ platform {
 	}
 }
 
+mixin {
+	if (hasProp("deps.emi")) config("${prop("mod.id")}.emi.mixins.json")
+	if (hasProp("deps.rei") && sc.current.parsed <= "1.20.1") config("${prop("mod.id")}.rei.mixins.json")
+	if (hasProp("deps.rrv")) config("${prop("mod.id")}.rrv.mixins.json")
+}
+
 legacyForge {
 	version = "${prop("deps.minecraft")}-${prop("deps.forge")}"
 	validateAccessTransformers = false

@@ -50,6 +50,7 @@
   "uei.config.blacklisted_mods": "Blacklisted Mods",
   "uei.config.info_order": "Info Order",
   "uei.config.lookup_enchantments_by_item": "Lookup Enchantments By Item",
+  "uei.config.lookup_item_enchantments": "Lookup Item Enchantments (Shift+V)",
   "uei.config.max_applicable_slots": "Applicable Item Slots",
   "uei.config.rarity_color_common": "Common Color",
   "uei.config.rarity_color_epic": "Epic Color",

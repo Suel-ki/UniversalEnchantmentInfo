@@ -107,7 +107,9 @@ class Context(
 
 	val mixinConfigs: List<String> by lazy {
 		buildList {
+			if (loader.id != "forge") add("$modId.mixins.json")
 			if ("emi" in viewerKeys) add("$modId.emi.mixins.json")
+			if ("rei" in viewerKeys && stonecutter.eval(currentMcVersion, "<=1.20.1")) add("$modId.rei.mixins.json")
 			if ("rrv" in viewerKeys) add("$modId.rrv.mixins.json")
 		}
 	}

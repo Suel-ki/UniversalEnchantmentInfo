@@ -66,6 +66,9 @@ public class Config {
     @ConfigSpec(impactsCache = true)
     public boolean lookupEnchantmentsByItem = true;
 
+    @ConfigSpec
+    public boolean lookupItemEnchantments = true;
+
     @ConfigSpec(impactsCache = true)
     public List<String> blacklistedMods = new ArrayList<>();
 

@@ -40,6 +40,10 @@ public class EmiEnchantmentRecipe implements EmiRecipe {
     private final List<EmiIngredient> applicableSlotIngredients;
     private final List<EmiIngredient> exclusiveEmiIngredients;
 
+    public EnchantmentRecipeData data() {
+        return recipe;
+    }
+
     public EmiEnchantmentRecipe(Identifier id, EnchantmentRecipeData recipe) {
         this.recipe = recipe;
         this.id = id;

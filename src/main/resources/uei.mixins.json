@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "io.github.suel_ki.uei.mixin",
+  "compatibilityLevel": "${java}",
+  "minVersion": "0.8",
+  "client": [
+    "MixinScreenKey"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

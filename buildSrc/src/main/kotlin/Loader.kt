@@ -54,7 +54,11 @@ sealed class Loader(val id: String) {
 					ModrinthEnvironment.CLIENT_ONLY_SERVER_OPTIONAL, ModrinthEnvironment.CLIENT_AND_SERVER,
 					ModrinthEnvironment.CLIENT_OR_SERVER_PREFERS_BOTH, ModrinthEnvironment.CLIENT_OR_SERVER -> "*"
 				},
-				accessWidener = null,
+				accessWidener = if (ctx.stonecutter.eval(ctx.currentMcVersion, ">=26")) {
+		"${ctx.modId}.official.accesswidener"
+	} else {
+		"${ctx.modId}.named.accesswidener"
+	},
 				entrypoints = ctx.fabricEntrypoints,
 				mixins = ctx.mixinConfigs,
 				depends = ctx.extension.dependencies.required.associate { it.modid.get() to it.fabricLikeVersionRange.get() },

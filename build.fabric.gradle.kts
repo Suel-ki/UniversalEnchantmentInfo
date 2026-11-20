@@ -48,6 +48,10 @@ if (hasProp("deps.mezz-config")) {
 }
 
 loom {
+	accessWidenerPath = rootProject.file(
+  		if (sc.current.parsed < "26") "src/main/resources/uei.named.accesswidener" else "src/main/resources/uei.official.accesswidener"
+  	)
+
 	runs.named("client") {
 		client()
 		runDirectory.set(layout.projectDirectory.dir("run"))

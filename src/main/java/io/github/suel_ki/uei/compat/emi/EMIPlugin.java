@@ -19,8 +19,7 @@ public class EMIPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {
         registry.addCategory(ENCHANTMENT_CATEGORY);
-
-        registry.addWorkstation(EMIPlugin.ENCHANTMENT_CATEGORY, EmiStack.of(Items.ENCHANTED_BOOK));
+        registry.addWorkstation(ENCHANTMENT_CATEGORY, EmiStack.of(Items.ENCHANTED_BOOK));
 
         for (var recipe : EnchantmentDataFactory.getOrComputeRecipes()) {
             Identifier id = recipe.id();
@@ -28,9 +27,7 @@ public class EMIPlugin implements EmiPlugin {
                 continue;
             }
 
-            Identifier recipeId = Uei.id(Uei.MOD_ID, String.format("/%s/%s", id.getNamespace(), id.getPath())
-            );
-
+            Identifier recipeId = Uei.id(Uei.MOD_ID, String.format("/%s/%s", id.getNamespace(), id.getPath()));
             registry.addRecipe(new EmiEnchantmentRecipe(recipeId, recipe));
         }
     }

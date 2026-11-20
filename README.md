@@ -25,6 +25,7 @@ A JEI/REI/EMI/RRV plugin that displays detailed enchantment information.
 - **R key** — view enchantment info for enchanted book
 - **U key** — view info of exclusive enchantments for enchanted book
 - **U key on an item** — view all enchantments applicable to it
+- **Shift+V on an item slot** — open the info pages of the enchantments on that item
 
 ## Features
 
@@ -76,6 +77,7 @@ Each line can be toggled independently; `Info Order` and `Section Order` control
 | Option | Default | Description |
 | --- | --- | --- |
 | Lookup Enchantments By Item | `true` | Press U on an item to list every enchantment it accepts |
+| Lookup Item Enchantments | `true` | Press Shift+V on an item slot to open the info pages of the enchantments on that item |
 | Applicable Item Sort | `REGISTRY` | Order of applicable items: `REGISTRY`, `NAME` or `MOD` |
 | Apotheosis / Apothic Compat | `true` | Use the real max level from Apotheosis or Apothic Enchanting (only shown when installed) |
 

@@ -39,6 +39,10 @@ public class EnchantmentClientRecipe implements ReliableClientRecipe {
 
     private int cycleTicks;
 
+    public EnchantmentRecipeData data() {
+        return recipe;
+    }
+
     public EnchantmentClientRecipe(EnchantmentRecipeData recipe) {
         Font font = Minecraft.getInstance().font;
         int slotAreaWidth = EnchantmentUIRenderer.PANEL_WIDTH - 2 * EnchantmentItemGrid.CONTENT_INSET;
