@@ -99,6 +99,7 @@ public record EnchantmentProperties(
         boolean treasureOnly,
         boolean tradeable,
         boolean discoverable,
+        boolean inEnchantingTable,
         Component rarity,
         String modid
 ) {
@@ -124,6 +125,7 @@ public record EnchantmentProperties(
                 holder.is(EnchantmentTags.CURSE),
                 holder.is(EnchantmentTags.TREASURE),
                 holder.is(EnchantmentTags.TRADEABLE),
+                holder.is(EnchantmentTags.ON_RANDOM_LOOT),
                 holder.is(EnchantmentTags.IN_ENCHANTING_TABLE),
                 rarityName(weight),
                 loc.getNamespace()

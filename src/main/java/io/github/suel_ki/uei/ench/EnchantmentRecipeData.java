@@ -221,7 +221,7 @@ public record EnchantmentRecipeData(
     }
 
     public boolean tableObtainable() {
-        return !enchantmentProperties.treasureOnly() && !enchantmentProperties.curse();
+        return enchantmentProperties.inEnchantingTable();
     }
 
     public boolean treasure() {
