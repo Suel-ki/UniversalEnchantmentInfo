@@ -179,6 +179,16 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			exclude(excluded)
 			exclude(disabledMixins)
 			exclude(disabledAccessWideners)
+
+			val guiAssets = "assets/${ctx.modId}/textures/gui"
+			if (ctx.stonecutter.eval(ctx.currentMcVersion, "<=1.20.1")) {
+				exclude("$guiAssets/sprites/**")
+			} else {
+				exclude("$guiAssets/scrollbar.png")
+			}
+			if ("rrv" !in ctx.viewerKeys) {
+				exclude("$guiAssets/rrv_ench.png")
+			}
 		}
 	}
 
