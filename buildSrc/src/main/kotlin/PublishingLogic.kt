@@ -79,8 +79,12 @@ fun Project.configureModPublishing(ctx: Context) {
 		changelog.set(rootProject.changelogText())
 		modLoaders.add(ctx.loader.id)
 
-		displayName =
-			"${ctx.modName} ${ctx.basicVersion} ${ctx.loader.id.replaceFirstChar(Char::titlecase)} ${ctx.currentMcVersion}"
+		val loaderName = when (ctx.loader.id) {
+			"fabric" -> "Fabric"
+			"neoforge" -> "NeoForge"
+			else -> "Forge"
+		}
+		displayName = "[$loaderName ${ctx.currentMcVersion}] v${ctx.basicVersion}"
 
 		if (githubEnabled) {
 			github {
